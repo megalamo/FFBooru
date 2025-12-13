@@ -94,7 +94,7 @@ function copyMe(node) {
 			$pagenum = 1;
 		else
 			$pagenum = ($_GET['pid']/$limit)+1;
-		if($tag_count > 1 || !$enable_cache || !is_dir($main_cache_dir."search_cache/$new_tag_cache/") || !file_exists($main_cache_dir."search_cache/$new_tag_cache/$pagenum.html") || strpos(strtolower($new_tag_cache),"all") !== false || strpos(strtolower($new_tag_cache),"user:") !== false || strpos(strtolower($new_tag_cache),"rating:") !== false || substr($new_tag_cache,0,1) == "-" || strpos(strtolower($new_tag_cache),"*") !== false || strpos(strtolower($new_tag_cache),"parent:") !== false)
+		if($tag_count > 1 || !$enable_cache || !is_dir($main_cache_dir."search_cache/$new_tag_cache/") || !file_exists($main_cache_dir."search_cache/$new_tag_cache/$pagenum.html") || strpos(strtolower($new_tag_cache),"all") !== false || strpos(strtolower($new_tag_cache),"user:") !== false || strpos(strtolower($new_tag_cache),"rating:") !== false || substr($new_tag_cache,0,1) == "-" || strpos(strtolower($new_tag_cache),"*") !== false || strpos(strtolower($new_tag_cache),"parent:") !== false || strpos(strtolower($new_tag_cache),"width:") !== false || strpos(strtolower($new_tag_cache),"height:") !== false)
 		{
 			if($enable_cache && !is_dir($main_cache_dir."search_cache/"))
 				@mkdir($main_cache_dir."search_cache");
@@ -102,7 +102,7 @@ function copyMe(node) {
 			$result = $db->query($query) or die($db->error);
 			$numrows = $result->num_rows;
 			$result->free_result();
-			if($tag_count > 1 || strtolower($new_tag_cache) == "all" || strpos(strtolower($new_tag_cache),"user:") !== false || strpos(strtolower($new_tag_cache),"rating:") !== false || substr($new_tag_cache,0,1) == "-" || strpos(strtolower($new_tag_cache),"*") !== false || strpos(strtolower($new_tag_cache),"parent:") !== false)
+			if($tag_count > 1 || strtolower($new_tag_cache) == "all" || strpos(strtolower($new_tag_cache),"user:") !== false || strpos(strtolower($new_tag_cache),"rating:") !== false || substr($new_tag_cache,0,1) == "-" || strpos(strtolower($new_tag_cache),"*") !== false || strpos(strtolower($new_tag_cache),"parent:") !== false || strpos(strtolower($new_tag_cache),"width:") !== false || strpos(strtolower($new_tag_cache),"height:") !== false)
 				$should_cache_response = false;
 			else
 			{
@@ -149,7 +149,7 @@ function copyMe(node) {
 			if($should_cache_response || isset($tag_count) && $tag_count > 1 || strpos(strtolower($new_tag_cache),"user:") !== false || strpos(strtolower($new_tag_cache),"rating:") !== false || substr($new_tag_cache,0,1) == "-" || strpos(strtolower($new_tag_cache),"*") !== false || strpos(strtolower($new_tag_cache),"parent:") !== false)
 				$query = $query." LIMIT $page, $limit";			
 		}
-		if(!isset($_GET['tags']) || $should_cache_response || isset($tag_count) && $tag_count > 1 || strtolower($_GET['tags']) == "all" || strpos(strtolower($new_tag_cache),"user:") !== false || strpos(strtolower($new_tag_cache),"rating:") !== false || substr($new_tag_cache,0,1) == "-" || strpos(strtolower($new_tag_cache),"*") !== false || strpos(strtolower($new_tag_cache),"parent:") !== false)
+		if(!isset($_GET['tags']) || $should_cache_response || isset($tag_count) && $tag_count > 1 || strtolower($_GET['tags']) == "all" || strpos(strtolower($new_tag_cache),"user:") !== false || strpos(strtolower($new_tag_cache),"rating:") !== false || substr($new_tag_cache,0,1) == "-" || strpos(strtolower($new_tag_cache),"*") !== false || strpos(strtolower($new_tag_cache),"parent:") !== false || strpos(strtolower($new_tag_cache),"width:") !== false || strpos(strtolower($new_tag_cache),"height:") !== false)
 		{
 			if($should_cache_response && $enable_cache)
 				ob_start();
