@@ -1,124 +1,92 @@
 <?php
-	$user = new user();
-	$ip = $db->real_escape_string($_SERVER['REMOTE_ADDR']);	
-	if($user->banned_ip($ip))
-	{
-		print "Action failed: ".$row['reason'];
-		exit;
+//Load required classes
+$user = new user();
+$logger = new logger();
+$ip = $_SERVER['REMOTE_ADDR'];	
+
+//Check if user is banned
+if($user->banned_ip($ip)){
+    $logger->log_action($f3->get('checked_user_id'), $_SERVER['REMOTE_ADDR'], 'FORUM_ADD', 'BANNED');
+	$template=new Template;
+    echo $template->render('no_permission.html');
+	exit();
+}
+
+//Check if user is logged in
+if(!$user->check_log()){
+    $logger->log_action($f3->get('checked_user_id'), $_SERVER['REMOTE_ADDR'], 'FORUM_ADD', 'NOT_LOGGED_IN');
+	$template=new Template;
+    echo $template->render('no_permission.html');
+	exit();
+}
+
+//Check for posted data
+if($f3->get('PARAMS.type') == "post"){
+	//Check if we are adding a post to a thread
+	if($f3->get('PARAMS.id') !== "" && is_numeric($f3->get('PARAMS.id')) && isset($_POST['conf']) && $_POST['conf'] == 1){
+		//Store vars
+		$title = stripslashes(htmlentities($_POST['title'], ENT_QUOTES, 'UTF-8', FALSE));
+		$post = stripslashes(htmlentities($_POST['post'], ENT_QUOTES, 'UTF-8', FALSE));
+		$pid = $f3->get('PARAMS.id');
+		$limit = $_POST['l'];
+		$uid = $f3->get('checked_user_id');           
+        //Check if topic is locked
+        $locked = $db->exec('SELECT locked FROM '.$f3->get('forum_topic_table').' WHERE id = ?',array(1=>$pid));
+        $is_locked = $locked[0]["locked"];
+		//If locked, redirect
+        if($is_locked == 1){
+			$f3->reroute('/forum/list');
+		}
+        //Check if user has access to add forum post
+        $canpost = $db->exec('SELECT forum_can_post FROM '.$f3->get('user_table').' WHERE id = ?',array(1=>$uid));
+		$can_post = $canpost[0]["forum_can_post"];
+		//If no access, redirect
+		if($can_post == 0){
+			$f3->reroute('/forum/list');
+		}
+		//Add post and save id
+        $insert = $db->exec('INSERT INTO '.$f3->get('forum_post_table').' (title, post, author, creation_date, topic_id) VALUES(?, ?, ?, NOW(), ?)',array(1=>$title,2=>$post,3=>$uid,4=>$pid));
+        $id = $db->lastInsertId();
+        //Update main thread last updated date
+        $update1 = $db->exec('UPDATE '.$f3->get('forum_topic_table').' SET last_updated = NOW() WHERE id = ?',array(1=>$pid));
+		//Update forum post count for user          
+		$update2 = $db->exec('UPDATE '.$f3->get('user_table').' SET forum_post_count = forum_post_count + 1 WHERE id = ?',array(1=>$f3->get('checked_user_id')));
+		//Get the number for total posts for topic
+		$count = $db->exec('SELECT COUNT(*) as count FROM '.$f3->get('forum_post_table').' WHERE topic_id = ?',array(1=>$pid));
+		$numrows = $count[0]["count"];
+		//Calculate what page number the post will be on
+		$ppid = ceil($numrows/$limit);
+		if ($ppid == 0){
+			$ppid = 1;
+		}
+		//Done, redirect the user to the page their post is on
+		$logger->log_action($f3->get('checked_user_id'), $_SERVER['REMOTE_ADDR'], 'FORUM_ADD_POST', 'SUCCESS', $pid);
+		$f3->reroute('/forum/view/'.$pid.'/'.$ppid.'#'.$id);
 	}	
-	if(!$user->check_log())
-	{
-		header("Location:index.php?page=reg");
-		exit;
+}else{
+	//Check if we are making a new thread
+	if(isset($_POST['topic']) && $_POST['topic'] != "" && isset($_POST['post']) && $_POST['post'] != "" && isset($_POST['conf']) && $_POST['conf'] == 1){
+		$topic = stripslashes(htmlentities($_POST['topic'], ENT_QUOTES, 'UTF-8', FALSE));
+		$post = stripslashes(htmlentities($_POST['post'], ENT_QUOTES, 'UTF-8', FALSE));
+		$uid = $f3->get('checked_user_id');			
+        //Check if user has access to add forum topic
+        $canaddtopic = $db->exec('SELECT forum_can_create_topic FROM '.$f3->get('user_table').' WHERE id = ?',array(1=>$uid));
+        $can_create_topic = $canaddtopic[0]["forum_can_create_topic"];
+		//If no access, redirect
+		if($can_create_topic == 0){
+			$f3->reroute('/forum/list');
+		}
+        //Add forum topic and save id
+        $insert1 = $db->exec('INSERT INTO '.$f3->get('forum_topic_table').' (topic, author, creation_post, last_updated) VALUES(?, ?, \'0\', NOW())',array(1=>$topic,2=>$uid));
+        $pid = $db->lastInsertId();
+		//Add first forum post for topic and save id
+        $insert2 = $db->exec('INSERT INTO '.$f3->get('forum_post_table').' (title, post, author, creation_date, topic_id) VALUES(?, ?, ?, NOW(), ?)',array(1=>$topic,2=>$post,3=>$uid,4=>$pid));
+        $id = $db->lastInsertId();
+		//Update creation post id for topic now that we have it
+        $update = $db->exec('UPDATE '.$f3->get('forum_topic_table').' SET creation_post = ? WHERE id = ?',array(1=>$id,2=>$pid));
+        //Done, redirect the user to the page their post is on
+        $logger->log_action($f3->get('checked_user_id'), $_SERVER['REMOTE_ADDR'], 'FORUM_ADD_TOPIC', 'SUCCESS', $pid);
+        $f3->reroute('/forum/view/'.$pid.'#'.$id);
 	}
-	$add_forum_count = "UPDATE $user_table SET forum_post_count = forum_post_count+1 WHERE id='$checked_user_id'";	
-	if(isset($_GET['t']) && $_GET['t'] == "post")
-	{
-		if(isset($_GET['pid']) && is_numeric($_GET['pid']) && isset($_POST['conf']) && $_POST['conf'] == 1)
-		{
-			$title = $db->real_escape_string(htmlentities($_POST['title'], ENT_QUOTES, 'UTF-8'));
-			$post = $db->real_escape_string(htmlentities($_POST['post'], ENT_QUOTES, 'UTF-8'));
-			$pid = $db->real_escape_string($_GET['pid']);
-			$limit = $db->real_escape_string($_POST['l']);
-			$uid = $checked_user_id;
-			$query = "SELECT locked FROM $forum_topic_table WHERE id='$pid'";
-			$result = $db->query($query) or die($db->error);
-			$row = $result->fetch_assoc();
-			if($row['locked'] == true)
-			{
-				header("HTTP/1.1 404 Not Found");
-				exit;
-			}
-			$query = "SELECT forum_can_post FROM $user_table WHERE id='$uid'";
-			$result = $db->query($query) or die($db->error);
-			$row = $result->fetch_assoc();
-			$user = $checked_username;
-			$can_post = $row['forum_can_post'];
-			if($can_post == false)
-			{
-				header("HTTP/1.1 404 Not Found");
-				exit;
-			}
-			$query = "INSERT INTO $forum_post_table(title, post, author, creation_date, topic_id) VALUES('$title', '$post', '$user', '".mktime()."', '$pid')";
-			$db->query($query) or die($db->error);
-			$query = "SELECT LAST_INSERT_ID() as id FROM $forum_post_table";
-			$result = $db->query($query) or die($db->error);
-			$row = $result->fetch_assoc();
-			$id = $row['id'];
-			$result->free_result();
-			$query = "UPDATE $forum_topic_table SET last_updated='".mktime()."' WHERE id='$pid'";
-			$db->query($query) or die($db->error);
-			$db->query($add_forum_count);			
-			$query = "SELECT COUNT(*) FROM $forum_post_table WHERE topic_id='$pid'";
-			$result = $db->query($query) or die($db->error);
-			$row = $result->fetch_assoc();
-			$numrows = $row['COUNT(*)'];
-			$result->free_result();
-			$pages = @intval($numrows/$limit);
-			if($numrows%$limit>0) 
-				$pages++;
-			else
-				$pages = 1;
-			$ppid = $limit*($pages - 1);
-			header("Location:index.php?page=forum&s=view&id=$pid&pid=$ppid#$id");
-			exit;
-		}	
-	}
-	else
-	{
-		if(isset($_POST['topic']) && $_POST['topic'] != "" && isset($_POST['post']) && $_POST['post'] != "" && isset($_POST['conf']) && $_POST['conf'] == 1)
-		{
-			$topic = $db->real_escape_string(htmlentities($_POST['topic'], ENT_QUOTES, 'UTF-8'));
-			$post = $db->real_escape_string(htmlentities($_POST['post'], ENT_QUOTES, 'UTF-8'));
-			$uid = $checked_user_id;
-			$query = "SELECT forum_can_create_topic FROM $user_table WHERE id='$uid'";
-			$result = $db->query($query) or die($db->error);
-			$row = $result->fetch_assoc();
-			$user = $checked_username;
-			$can_create_topic = $row['forum_can_create_topic'];
-			if($can_create_topic == false)
-			{
-				header("HTTP/1.1 404 Not Found");
-				exit;
-			}
-			$query = "INSERT INTO $forum_topic_table(topic, author, creation_post, last_updated) VALUES('$topic', '$user', '0', '".mktime()."')";
-			$db->query($query) or die($db->error);
-			$query = "SELECT LAST_INSERT_ID() as id FROM $forum_topic_table";
-			$result = $db->query($query) or die($db->error);
-			$row = $result->fetch_assoc();
-			$pid = $row['id'];
-			$query = "INSERT INTO $forum_post_table(title, post, author, creation_date, topic_id) VALUES('$topic', '$post', '$user', '".mktime()."', '$pid')";
-			$db->query($query) or die($db->error);
-			$db->query($add_forum_count);			
-			$query = "SELECT LAST_INSERT_ID() as id FROM $forum_post_table";
-			$result = $db->query($query) or die($db->error);
-			$row = $result->fetch_assoc();
-			$id = $row['id'];
-			$query = "UPDATE $forum_topic_table SET creation_post='$id' WHERE id='$pid'";
-			$db->query($query) or die($db->error);
-			header("Location:index.php?page=forum&s=view&id=$pid#$id");
-			exit;
-		} 
-	}
-		require "includes/header.php";
+}
 ?>
-<form method="post" action="">
-	<table><tr><td>
-	Topic:<br/>	
-	<input type="text" name="topic" value=""/>
-	</td></tr>
-	<tr><td>
-	Post:<br />
-	<textarea name="post" rows="4" cols="6" style="width: 600px; height: 200px;"></textarea>
-	</td></tr>
-	<tr><td>
-	<input type="hidden" name="conf" id='conf' value="0"/>
-	</td></tr>
-	<tr><td>
-	<input type="submit" name="submit" value="Create topic"/>
-	</td></tr></table></form>
-	<script type="text/javascript">
-	//<![CDATA[
-	document.getElementById('conf').value=1;
-	//]]>
-	</script>
