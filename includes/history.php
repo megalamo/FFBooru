@@ -1,145 +1,145 @@
 <?php
+	//Start the classes we need
 	$userc = new user();
-	$cache = new cache();
 	$tclass = new tag();
-	if(isset($_GET['type']) && isset($_GET['id']) and is_numeric($_GET['id']))
-	{
-		$type = $db->real_escape_string($_GET['type']);
-		$id = $db->real_escape_string($_GET['id']);
-		$pid = $db->real_escape_string($_GET['pid']);
-		if($type == "note")
-		{
-			header("Cache-Control: store, cache");
-			header("Pragma: cache");
-			require "includes/header.php";
-			$pid = $db->real_escape_string($_GET['pid']);
-			$query = "SELECT updated_at, user_id, version, body FROM $note_history_table where id='$id' AND post_id='$pid' ORDER BY version DESC";
-			$result = $db->query($query);
-			$count = $result->num_rows;
-			while($row = $result->fetch_assoc())
-			{
-				$ret = "SELECT user FROM $user_table WHERE id='".$row['user_id']."'";
-				$set = $db->query($ret);
-				$retme = $set->fetch_assoc();
-				if($retme['user'] == "" || $retme['user'] == null)
+	if($f3->get('PARAMS.type') !== "" && $f3->get('PARAMS.id') !== "" && is_numeric($f3->get('PARAMS.id'))){
+		//Store params for later
+		$type = $f3->get('PARAMS.type');
+		$id = $f3->get('PARAMS.id');
+		$pid = $f3->get('PARAMS.pid');
+		$version = $f3->get('PARAMS.version');
+		//Type loop
+		if($type == "note" || $type == ""){
+            //Get note history
+			$result = $db->exec('SELECT updated_at, user_id, version, body FROM '.$f3->get('note_history_table').' WHERE note_id = ? AND post_id = ? ORDER BY version DESC',array(1=>$id,2=>$pid));
+			$count = count($result);
+			//Loop through each note
+			$notedata = array();
+			$notecount = 0;
+			foreach($result as $row){
+				//Query for username
+				$resultuser = $db->exec('SELECT user FROM '.$f3->get('user_table').' WHERE id = ?',array(1=>$row['user_id']));
+				$uname = $resultuser[0]['user'];
+				$updatedat = date("m/d/y", strtotime($row['updated_at']));
+                //Check for anonymous users
+                if($uname == "" || $uname == null){
 					$user = "Anonymous";
-				else
-					$user = $retme['user'];
-				$set->free_result();
-				echo '<a href="index.php?page=post&s=view&id='.$pid.'">'.$pid.'</a> <a href="index.php?page=history&type=note&id='.$id.'&pid='.$pid.'">'.$id.'</a>'.$row['body'].' '.$user.' '.$row['updated_at'].' <a href="#" onclick="if(confirm(\'Do you really want to revert to this point?\')){document.location=\'index.php?page=history&type=revert&id='.$id.'&pid='.$pid.'&version='.$row['version'].'\'; return false;}">Revert</a><br /><br />';
+				}else{
+					$user = $uname;
+				}
+			    //Store all note vars
+			    $notedata[$notecount]['body'] = $row['body'];
+			    $notedata[$notecount]['updated_at'] = $updatedat;
+			    $notedata[$notecount]['user'] = $user;
+			    $notedata[$notecount]['version'] = $row['version'];
+				$notecount++;
 			}
-			$result->free_result();
-			if($count <= 0)
-				echo '<h1>This note has no history!</h1>';
-		}
-		else if($type == "page_notes")
-		{
-			header("Cache-Control: store, cache");
-			header("Pragma: cache");
-			require "includes/header.php";
-			print '<table width="100%" class="highlightable" id="history">
-			<tr><th width="1%"></th><th width="4%">Post</th><th width="5%">Date</th><th width="10%">User</th><th width="60%">Body</th><th width="10%">Options</th></tr>';			
-			$query = "SELECT id, updated_at, user_id, version, body FROM $note_history_table where post_id='$id' ORDER BY id,version DESC";
-			$result = $db->query($query);
-			$count = $result->num_rows;
-			while($row = $result->fetch_assoc())
-			{
-				$ret = "SELECT user FROM $user_table WHERE id='".$row['user_id']."'";
-				$set = $db->query($ret);
-				$retme = $set->fetch_assoc();
-				if($retme['user'] == "" || $retme['user'] == null)
+			//Set note data for template
+			$f3->set('notedata',$notedata);
+			$f3->set('notecount',$count);
+	    	//Render template
+	    	$template=new Template;
+	        echo $template->render('note_history.html');		
+		}else if($type == "page_notes"){
+			//Get note history
+			$result = $db->exec('SELECT id, updated_at, user_id, version, body, note_id FROM '.$f3->get('note_history_table').' WHERE post_id = ? ORDER BY id,version DESC',array(1=>$id));
+			$count = count($result);
+			//Loop through each note
+			$notedata = array();
+			$notecount = 0;
+			foreach($result as $row){
+				//Query for username
+				$resultuser = $db->exec('SELECT user FROM '.$f3->get('user_table').' WHERE id = ?',array(1=>$row['user_id']));
+				$uname = $resultuser[0]['user'];
+				$updatedat = date("m/d/y", strtotime($row['updated_at']));
+                //Check for anonymous users
+                if($uname == "" || $uname == null){
 					$user = "Anonymous";
-				else
-					$user = $retme['user'];
-				$set->free_result();
-				echo '<tr><td></td><td><a href="index.php?page=post&s=view&id='.$id.'">'.$id.'</a></td><td>'.$row['updated_at'].'</td><td>'.$user.'</td><td>'.$row['body'].'</td><td><a href="#" onclick="if(confirm(\'Do you really want to revert to this point?\')){document.location=\'index.php?page=history&type=revert&id='.$row['id'].'&pid='.$id.'&version='.$row['version'].'\'; return false;}">Revert</a></td></tr>';
+				}else{
+					$user = $uname;
+				}
+				//Store all note vars
+			    $notedata[$notecount]['id'] = $row['id'];
+			    $notedata[$notecount]['body'] = $row['body'];
+			    $notedata[$notecount]['updated_at'] = $updatedat;
+			    $notedata[$notecount]['note_id'] = $row['note_id'];
+			    $notedata[$notecount]['user'] = $user;
+			    $notedata[$notecount]['version'] = $row['version'];
+				$notecount++;
 			}
-			print "</table>";
-			$result->free_result();
-			if($count <= 0)
-				echo '<h1>This post has no note history!</h1>';
-		}
-		else if($type == "tag_history")
-		{
-			header("Cache-Control: store, cache");
-			header("Pragma: cache");
-			require "includes/header.php";
-			$query = "SELECT tags, version, user_id, updated_at FROM $tag_history_table WHERE id='$id' AND active='1' ORDER BY total_amount DESC";
-			$result = $db->query($query) or die($db->error);
-			$count = $result->num_rows;
-			print '<table width="100%" class="highlightable" id="history">
-			<tr><th width="1%"></th><th width="4%">Post</th><th width="5%">Date</th><th width="10%">User</th><th width="60%">Tags</th><th width="10%">Options</th></tr>';			
-			while($row = $result->fetch_assoc())
-			{
-				$ret = "SELECT user FROM $user_table WHERE id='".$row['user_id']."'";
-				$set = $db->query($ret);
-				$retme = $set->fetch_assoc();
-				if($retme['user'] == "" || $retme['user'] == null)
+			//Set note data for template
+			$f3->set('notedata',$notedata);
+			$f3->set('notecount',$count);
+	    	//Render template
+	    	$template=new Template;
+	        echo $template->render('post_note_history.html');
+		}else if($type == "tag_history"){
+			//Get tag history
+			$result = $db->exec('SELECT tags, version, user_id, updated_at FROM '.$f3->get('tag_history_table').' WHERE id = ? AND active = \'1\' ORDER BY total_amount DESC',array(1=>$id));
+			$count = count($result);			
+			//Loop through tag set
+			$tagdata = array();
+			$tagcount = 0;
+			foreach($result as $row){
+				//Query for username
+				$resultuser = $db->exec('SELECT user FROM '.$f3->get('user_table').' WHERE id = ?',array(1=>$row['user_id']));
+				$uname = $resultuser[0]['user'];
+				$updatedat = date("m/d/y", strtotime($row['updated_at']));
+                //Check for anonymous users
+                if($uname == "" || $uname == null){
 					$user = "Anonymous";
-				else
-					$user = htmlentities($retme['user'], ENT_QUOTES, 'UTF-8');
-				echo '<tr><td></td><td><a href="index.php?page=post&s=view&id='.$id.'">'.$id.'</a></td><td>'.$row['updated_at'].'</td><td>'.$user.'</td><td>'.$row['tags'].'</td><td><a href="#" onclick="if(confirm(\'Do you really want to revert to this point?\')){document.location=\'index.php?page=history&type=revert_tags&id='.$id.'&version='.$row['version'].'\'; return false;}">Revert</a></td></tr>';
+				}else{
+					$user = $uname;
+				}
+				//Store all tag vars
+			    $tagdata[$tagcount]['tags'] = $row['tags'];
+			    $tagdata[$tagcount]['updated_at'] = $updatedat;
+			    $tagdata[$tagcount]['user'] = $user;
+			    $tagdata[$tagcount]['version'] = $row['version'];
+				$tagcount++;
 			}
-			print "</table>";
-			$result->free_result();
-			if($count <= 0)
-				echo '<h1>This post has no tag history!</h1>';
-		}
-		else if($type == "revert")
-		{
-			if($userc->gotpermission('reverse_notes'))
-			{
-					$pid = $db->real_escape_string($_GET['pid']);
-					$version = $db->real_escape_string($_GET['version']);
-					$query = "SELECT updated_at, x, y, width, height, body, user_id, ip FROM $note_history_table WHERE id='$id' AND post_id='$pid' AND version='$version'";
-					$result = $db->query($query);
-					$row = $result->fetch_assoc();
-					$query = "UPDATE $note_table SET updated_at='".$row['updated_at']."', x='".$row['x']."', y='".$row['y']."', width='".$row['width']."', height='".$row['height']."', body='".$row['body']."', user_id='".$row['user_id']."', ip='".$row['ip']."', version='$version' WHERE id='$id' AND post_id='$pid'";
-					$result->free_result();
-					$db->query($query);
-					$query = "DELETE FROM $note_history_table WHERE id='$id' AND post_id='$pid' AND version >= '$version'";
-					$db->query($query);
-						$cache->destroy("cache/".$id."/post.cache");
-					header("Location:index.php?page=post&s=view&id=$pid");
+			//Set tag data for template
+			$f3->set('tagdata',$tagdata);
+			$f3->set('tagcount',$count);
+	    	//Render template
+	    	$template=new Template;
+	        echo $template->render('tag_history.html');
+        }else if($type == "revert"){
+			//Check if user has permission to revert
+			if($userc->gotpermission('reverse_notes')){
+					$result1 = $db->exec('SELECT updated_at, x, y, width, height, body, user_id, ip FROM '.$f3->get('note_history_table').' WHERE id = ? AND post_id = ? AND version = ?',array(1=>$id,2=>$pid,3=>$version));
+					$update = $db->exec('UPDATE '.$f3->get('note_table').' SET updated_at = ?, x = ?, y = ?, width = ?, height = ?, body = ?, user_id = ?, ip = ?, version = ? WHERE id = ? AND post_id = ?',array(1=>$result1[0]['updated_at'],2=>$result1[0]['x'],3=>$result1[0]['y'],4=>$result1[0]['width'],5=>$result1[0]['height'],6=>$result1[0]['body'],7=>$result1[0]['user_id'],8=>$result1[0]['ip'],9=>$version,10=>$id,11=>$pid));
+					$delete = $db->exec('DELETE FROM '.$f3->get('note_history_table').' WHERE id = ? AND post_id = ? AND version >= ? ',array(1=>$id,1=>$pid,1=>$version));
+					//Redirect to post
+					$f3->reroute('/post/view/'.$pid);
+			}else{
+				//Redirect to post
+				$f3->reroute('/post/view/'.$pid);
 			}
-			header("Location:index.php?page=post&s=view&id=$pid");
-		}
-		else if($type == "revert_tags")
-		{
-			$version = $db->real_escape_string($_GET['version']);
-			if($userc->gotpermission('reverse_tags'))
-			{
+		}else if($type == "revert_tags"){
+			//Check if user has permission to revert
+			if($userc->gotpermission('reverse_tags')){
 					$misc = new misc();
-					$query = "SELECT t1.tags, t2.tags AS t2_tags FROM $tag_history_table AS t1 JOIN $post_table AS t2 ON t2.id='$id' WHERE t1.id='$id' AND t1.version='$version'";
-					$result = $db->query($query) or die($db->error);
-					$row = $result->fetch_assoc();
-					$tmp = explode(" ",mb_trim($row['t2_tags']));
-					foreach($tmp as $current)
-					{
-						if(is_dir("$main_cache_dir".""."\search_cache/".$misc->windows_filename_fix($current)."/") && $current != "")
-							$cache->destroy_page_cache("search_cache/".$misc->windows_filename_fix($current)."/");
+					$result1 = $db->exec('SELECT t1.tags, t2.tags AS t2_tags FROM '.$f3->get('tag_history_table').' AS t1 JOIN '.$f3->get('post_table').' AS t2 ON t2.id = ? WHERE t1.id = ? AND t1.version = ?',array(1=>$id,2=>$id,3=>$version));
+					$tmp = explode(" ",$misc->mb_trim($result1[0]['t2_tags']));
+					foreach($tmp as $current){
 						$tclass->deleteindextag($current);							
 					}
-					$tmp = explode(" ",mb_trim($row['tags']));
-					foreach($tmp as $current)
-					{
-						if(is_dir("$main_cache_dir".""."\search_cache/".$current."/") && $current != "")
-							$cache->destroy_page_cache("search_cache/".$current."/");
+					$tmp = explode(" ",$misc->mb_trim($result1[0]['tags']));
+					foreach($tmp as $current){
 						$tclass->addindextag($current);							
-					}					
-
-					$query = "UPDATE $post_table SET tags='".$row['tags']."', recent_tags='".$row['tags']."', tags_version='$version' WHERE id='$id'";
-					$result->free_result();
-					$db->query($query);
-					$query = "UPDATE $tag_history_table SET active='0' WHERE id='$id' AND version > '$version'";
-					$db->query($query);
-					$cache->destroy("cache/".$id."/post.cache");					
-					header("Location:index.php?page=post&s=view&id=$id");
+					}
+					$update1 = $db->exec('UPDATE '.$f3->get('post_table').' SET tags = ?, recent_tags = ?, tags_version = ? WHERE id = ?',array(1=>$result1[0]['tags'],2=>$result1[0]['tags'],3=>$version,4=>$id));
+					$update2 = $db->exec('UPDATE '.$f3->get('tag_history_table').' SET active=\'0\' WHERE id = ? AND version > ?',array(1=>$id,2=>$version));
+					//Redirect to post
+					$f3->reroute('/post/view/'.$pid);
+			}else{
+				//Redirect to post
+				$f3->reroute('/post/view/'.$pid);
 			}
-			else
-				header("Location:index.php?page=post&s=view&id=$id");
 		}
+	}else{
+		//Redirect to all posts
+		$f3->reroute('/post/all/'.$pid);
 	}
-	else
-		header("Location:index.php");
 ?>
