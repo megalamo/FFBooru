@@ -77,7 +77,7 @@ class Session extends Mapper {
 		$this->set('csrf',$sent?$this->csrf():$csrf);
 		$this->set('ip',$fw->get('IP'));
 		$this->set('agent',
-			isset($headers['User-Agent'])?$headers['User-Agent']:'');
+			$headers['User-Agent'] ?? '');
 		$this->set('stamp',time());
 		$this->save();
 		return TRUE;
@@ -90,7 +90,7 @@ class Session extends Mapper {
 	**/
 	function destroy($id) {
 		$this->erase(array('session_id'=>$id));
-		setcookie(session_name(),'',strtotime('-1 year'));
+		setcookie(session_name(),'',['expires' => strtotime('-1 year')]);
 		unset($_COOKIE[session_name()]);
 		header_remove('Set-Cookie');
 		return TRUE;

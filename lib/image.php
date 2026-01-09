@@ -286,7 +286,7 @@ class Image {
 		if (is_null($align))
 			$align=self::POS_Right|self::POS_Bottom;
 		if (is_array($align)) {
-			list($posx,$posy)=$align;
+			[$posx, $posy]=$align;
 			$align = 0;
 		}
 		$ovr=imagecreatefromstring($img->dump());
@@ -351,7 +351,7 @@ class Image {
 		);
 		$hash=sha1($str);
 		$this->data=imagecreatetruecolor($size,$size);
-		list($r,$g,$b)=$this->rgb(hexdec(substr($hash,-3)));
+		[$r, $g, $b]=$this->rgb(hexdec(substr($hash,-3)));
 		$fg=imagecolorallocate($this->data,$r,$g,$b);
 		imagefill($this->data,0,0,IMG_COLOR_TRANSPARENT);
 		$ctr=count($sprites);

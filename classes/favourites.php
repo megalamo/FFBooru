@@ -9,7 +9,7 @@ class favorites{
 	    global $f3,$db;
 	    $logger = new logger();
 		$post = new post();
-		$logger->log_action($f3->get('checked_user_id'), $_SERVER['REMOTE_ADDR'], 'FAVORITES_VIEW', $f3->get('PARAMS.id'));
+		$logger->log_action($_SERVER['REMOTE_ADDR'], 'FAVORITES_VIEW', $f3->get('checked_user_id'), $f3->get('PARAMS.id'));
 		//Number of images/page
 		$limit = 50;
 
@@ -76,7 +76,7 @@ class favorites{
 	function fav_list(){
 	    global $f3,$db;
 	    $logger = new logger();
-		$logger->log_action($f3->get('checked_user_id'), $_SERVER['REMOTE_ADDR'], 'FAVORITES_LIST', $f3->get('PARAMS.page'));
+		$logger->log_action($_SERVER['REMOTE_ADDR'], 'FAVORITES_LIST', $f3->get('checked_user_id'), $f3->get('PARAMS.page'));
 		//Number of users/page
 		$limit = 50;	    
 
@@ -134,7 +134,7 @@ class favorites{
 		
         //Check if user is logged in
         if(!$user->check_log()){
-            $logger->log_action($f3->get('checked_user_id'), $_SERVER['REMOTE_ADDR'], 'FAVORITES_DELETE', 'NOT_LOGGED_IN');
+            $logger->log_action($_SERVER['REMOTE_ADDR'], 'FAVORITES_DELETE', $f3->get('checked_user_id'), 'NOT_LOGGED_IN');
         	$template=new Template;
             echo $template->render('no_permission.html');
         	exit();
@@ -151,7 +151,7 @@ class favorites{
 			//Update favorites count for user
 			$update = $db->exec('UPDATE '.$f3->get('favorites_count_table').' SET fcount = fcount - 1 WHERE user_id = ?',array(1=>$user_id));
             //Log action
-        	$logger->log_action($f3->get('checked_user_id'), $_SERVER['REMOTE_ADDR'], 'FAVORITES_DELETE', 'SUCCESS', $id);
+        	$logger->log_action($_SERVER['REMOTE_ADDR'], 'FAVORITES_DELETE', $f3->get('checked_user_id'), 'SUCCESS', $id);
 		}
 		//Back to the page we came from
 		$f3->reroute('/favorites/view/'.$user_id.'/'.$page);
@@ -164,13 +164,13 @@ class favorites{
     	
         //Check if user is banned
         if($user->banned_ip($_SERVER['REMOTE_ADDR'])){
-            $logger->log_action($f3->get('checked_user_id'), $_SERVER['REMOTE_ADDR'], 'FAVORITES_ADD', 'BANNED');
+            $logger->log_action($_SERVER['REMOTE_ADDR'], 'FAVORITES_ADD', $f3->get('checked_user_id'), 'BANNED');
         	exit();
         }
         
         //Check if user is logged in
         if(!$user->check_log()){
-            $logger->log_action($f3->get('checked_user_id'), $_SERVER['REMOTE_ADDR'], 'FAVORITES_ADD', 'NOT_LOGGED_IN');
+            $logger->log_action($_SERVER['REMOTE_ADDR'], 'FAVORITES_ADD', $f3->get('checked_user_id'), 'NOT_LOGGED_IN');
         	echo "2";
         	exit();
         }    	
@@ -198,12 +198,12 @@ class favorites{
 						$update = $db->exec('UPDATE '.$f3->get('favorites_count_table').' SET fcount = fcount + 1 WHERE user_id = ?',array(1=>$f3->get('checked_user_id')));
 					}
 					//Success
-					$logger->log_action($f3->get('checked_user_id'), $_SERVER['REMOTE_ADDR'], 'FAVORITES_ADD', 'SUCCESS');
+					$logger->log_action($_SERVER['REMOTE_ADDR'], 'FAVORITES_ADD', $f3->get('checked_user_id'), 'SUCCESS');
 					echo "3";
 				}
 			}else{
 				//Favorite already exists
-				$logger->log_action($f3->get('checked_user_id'), $_SERVER['REMOTE_ADDR'], 'FAVORITES_ADD', 'FAV_EXISTS');
+				$logger->log_action($_SERVER['REMOTE_ADDR'], 'FAVORITES_ADD', $f3->get('checked_user_id'), 'FAV_EXISTS');
 				echo "1";
 			}
     	}

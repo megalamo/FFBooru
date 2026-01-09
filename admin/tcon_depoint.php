@@ -1,7 +1,7 @@
 <?php
 	require "../inv.header.php";
 	$user = new user();
-	if(!$user->gotpermission('is_admin'))
+	if(!$user->gotpermission('is_admin')){
 		header("Location:../");
 		exit;
 	}

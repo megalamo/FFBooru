@@ -120,7 +120,7 @@ class Pingback extends \Prefab {
 		$args=xmlrpc_decode_request($fw->get('BODY'),$method,$charset);
 		$options=array('encoding'=>$charset);
 		if ($method=='pingback.ping' && isset($args[0],$args[1])) {
-			list($source,$permalink)=$args;
+			[$source, $permalink]=$args;
 			$doc=new \DOMDocument('1.0',$fw->get('ENCODING'));
 			// Check local page if pingback-enabled
 			$parts=parse_url($permalink);

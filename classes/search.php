@@ -38,7 +38,7 @@
 			//Break out each tag
             foreach($ttags as $current){
 				//Check if parent delimiter
-                if(strpos(strtolower($current),'parent:') !== false){
+                if(str_contains(strtolower($current),'parent:')){
 					$parent = str_replace("parent:","",$current);
  					if(!is_numeric($parent)){
 						$g_parent = '';					
@@ -61,10 +61,10 @@
 					        $union = "UNION ALL";
 					    }
 						//Check if score delimiter
-                        if(strpos(strtolower($current),'score:')  !== false){
+                        if(str_contains(strtolower($current),'score:')){
 							$score = str_replace('score:','',$current);
 							//Check operator, if negative or positive
-							if(substr($current,0,1) == "-"){
+							if(str_starts_with($current, "-")){
 								$score = substr($score,1,strlen($score)-1);
 								//Check if score is a number
 								if(is_numeric($score)){
@@ -73,14 +73,14 @@
 								}
 							}else{
 								//Check for second operator
-								if(substr($score,0,1) == "<"){
+								if(str_starts_with($score, "<")){
 									$score = substr($score,1,strlen($score)-1);
 									//Check if score is a number
 									if(is_numeric($score)){
 										$g_owner = " AND score < ?";
 										$ga_other[$k+1] = (int)$score; $k++;
 									}				
-								}elseif(substr($score,0,1) == ">"){
+								}elseif(str_starts_with($score, ">")){
 									$score = substr($score,1,strlen($score)-1);
 									//Check if score is a number
 									if(is_numeric($score)){
@@ -97,10 +97,10 @@
 							}
 						}
 						//Check if rating delimiter
-                        else if(strpos(strtolower($current),'rating:')  !== false){
+                        else if(str_contains(strtolower($current),'rating:')){
 							$rating = str_replace('rating:','',$current);
 							//Check operator, if negative or positive
-							if(substr($current,0,1) == "-"){
+							if(str_starts_with($current, "-")){
 								//Make sure rating fits types, if not then set query to null
 								if($rating == "safe" || $rating == "s"){
 									$g_rating .= " AND rating != 's'";
@@ -125,9 +125,9 @@
 							}
 						}
 						//Check if user delimiter
-                        else if(strpos(strtolower($current),'user:')  !== false){
+                        else if(str_contains(strtolower($current),'user:')){
 							$owner = str_replace('user:','',$current);
-							if(substr($current,0,1) == "-"){
+							if(str_starts_with($current, "-")){
 								$owner = substr($owner,1,strlen($owner)-1);
 								//Check if userid or username
 								if(is_numeric($owner)){
@@ -163,7 +163,7 @@
 						//No delimiters, pass on
 						else{
 							//Check if using negative operator and format query
-                            if(substr($current,0,1) == "-"){
+                            if(str_starts_with($current, "-")){
 								$current = substr($current,1,strlen($current)-1);
 								$wildcard = strpos($current,"*");
 								$alias = $tclass->alias($current);
@@ -329,7 +329,7 @@
 			//Break out each tag
             foreach($ttags as $current){
 				//Check if parent delimiter
-                if(strpos(strtolower($current),'parent:') !== false){
+                if(str_contains(strtolower($current),'parent:')){
 					$parent = str_replace("parent:","",$current);
  					if(!is_numeric($parent)){
 						$g_parent = '';					
@@ -352,10 +352,10 @@
 					        $union = "UNION ALL";
 					    }
 						//Check if score delimiter
-                        if(strpos(strtolower($current),'score:')  !== false){
+                        if(str_contains(strtolower($current),'score:')){
 							$score = str_replace('score:','',$current);
 							//Check operator, if negative or positive
-							if(substr($current,0,1) == "-"){
+							if(str_starts_with($current, "-")){
 								$score = substr($score,1,strlen($score)-1);
 								//Check if score is a number
 								if(is_numeric($score)){
@@ -364,14 +364,14 @@
 								}
 							}else{
 								//Check for second operator
-								if(substr($score,0,1) == "<"){
+								if(str_starts_with($score, "<")){
 									$score = substr($score,1,strlen($score)-1);
 									//Check if score is a number
 									if(is_numeric($score)){
 										$g_owner = " AND score < ?";
 										$ga_other[$k+1] = (int)$score; $k++;
 									}				
-								}elseif(substr($score,0,1) == ">"){
+								}elseif(str_starts_with($score, ">")){
 									$score = substr($score,1,strlen($score)-1);
 									//Check if score is a number
 									if(is_numeric($score)){
@@ -388,10 +388,10 @@
 							}
 						}
 						//Check if rating delimiter
-                        else if(strpos(strtolower($current),'rating:')  !== false){
+                        else if(str_contains(strtolower($current),'rating:')){
 							$rating = str_replace('rating:','',$current);
 							//Check operator, if negative or positive
-							if(substr($current,0,1) == "-"){
+							if(str_starts_with($current, "-")){
 								//Make sure rating fits types, if not then set query to null
 								if($rating == "safe" || $rating == "s"){
 									$g_rating .= " AND rating != 's'";
@@ -416,9 +416,9 @@
 							}
 						}
 						//Check if user delimiter
-                        else if(strpos(strtolower($current),'user:')  !== false){
+                        else if(str_contains(strtolower($current),'user:')){
 							$owner = str_replace('user:','',$current);
-							if(substr($current,0,1) == "-"){
+							if(str_starts_with($current, "-")){
 								$owner = substr($owner,1,strlen($owner)-1);
 								//Check if userid or username
 								if(is_numeric($owner)){
@@ -454,7 +454,7 @@
 						//No delimiters, pass on
 						else{
 							//Check if using negative operator and format query
-                            if(substr($current,0,1) == "-"){
+                            if(str_starts_with($current, "-")){
 								$current = substr($current,1,strlen($current)-1);
 								$wildcard = strpos($current,"*");
 								$alias = $tclass->alias($current);

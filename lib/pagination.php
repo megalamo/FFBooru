@@ -21,7 +21,6 @@ class Pagination {
     private $range = 2;
     private $current_page;
     private $template = 'pagebrowser.html';
-    private $routeKey;
     private $routeKeyPrefix;
     private $linkPath;
 	private $fw;
@@ -34,10 +33,9 @@ class Pagination {
      * @param $limit int max items per page
      * @param $routeKey string the key for pagination in your routing
      */
-    public function __construct( $items, $limit = 10, $routeKey = 'page' ) {
+    public function __construct( $items, $limit = 10, private $routeKey = 'page' ) {
         $this->fw = \Base::instance();
         $this->items_count = is_array($items)?count($items):$items;
-        $this->routeKey = $routeKey;
         $this->setLimit($limit);
     }
 
@@ -100,8 +98,8 @@ class Pagination {
      * @param $linkPath
      */
     public function setLinkPath($linkPath) {
-        $this->linkPath = (substr($linkPath,0,1) != '/') ? '/'.$linkPath:$linkPath;
-        if(substr($this->linkPath,-1) != '/') $this->linkPath .= '/';
+        $this->linkPath = (!str_starts_with($linkPath, '/')) ? '/'.$linkPath:$linkPath;
+        if(!str_ends_with($this->linkPath, '/')) $this->linkPath .= '/';
     }
 
     /**
@@ -210,7 +208,7 @@ class Pagination {
             $route = $this->fw->get('PARAMS.0');
             if($this->fw->exists('PARAMS.'.$this->routeKey))
                 $route = preg_replace("/".$this->fw->get('PARAMS.'.$this->routeKey)."$/",'',$route);
-            elseif(substr($route,-1) != '/')
+            elseif(!str_ends_with($route, '/'))
                 $route.= '/';
         } else
             $route = $this->linkPath;

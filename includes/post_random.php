@@ -39,7 +39,7 @@
 		$row = $result->fetch_assoc();
 		$id = $row['id'];
 		$result->close();
-		if(strpos($blacklist,'rating:'.strtolower($row['rating']),0) === false || $override || $i > 20)
+		if(!str_contains($blacklist,'rating:'.strtolower($row['rating'])) || $override || $i > 20)
 			$valid_post_found = true;
 		if($i < 20 && $valid_post_found == true)
 		{

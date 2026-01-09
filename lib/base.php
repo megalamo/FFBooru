@@ -216,11 +216,9 @@ final class Base extends Prefab implements ArrayAccess {
 		$fw=$this;
 		return preg_replace_callback(
 			'/(?<!\w)@(\w(?:[\w\.\[\]\(]|\->|::)*)/',
-			function($var) use($fw) {
-				return '$'.preg_replace_callback(
+			fn($var) => '$'.preg_replace_callback(
 					'/\.(\w+)\(|\.(\w+)|\[((?:[^\[\]]*|(?R))*)\]/',
-					function($expr) use($fw) {
-						return $expr[1]?
+					fn($expr) => $expr[1]?
 							((function_exists($expr[1])?
 								('.'.$expr[1]):
 								('['.var_export($expr[1],TRUE).']')).'('):
@@ -229,11 +227,9 @@ final class Base extends Prefab implements ArrayAccess {
 									$fw->compile($expr[3]):
 									(ctype_digit($expr[2])?
 										(int)$expr[2]:
-										$expr[2]),TRUE).']');
-					},
+										$expr[2]),TRUE).']'),
 					$var[1]
-				);
-			},
+				),
 			$str
 		);
 	}
@@ -460,7 +456,7 @@ final class Base extends Prefab implements ArrayAccess {
 	**/
 	function visible($obj,$key) {
 		if (property_exists($obj,$key)) {
-			$ref=new ReflectionProperty(get_class($obj),$key);
+			$ref=new ReflectionProperty($obj::class,$key);
 			$out=$ref->ispublic();
 			unset($ref);
 			return $out;
@@ -619,7 +615,7 @@ final class Base extends Prefab implements ArrayAccess {
 						var_export($key,TRUE).'=>'.
 						$this->stringify($val,
 							array_merge($stack,array($arg)));
-				return get_class($arg).'::__set_state(array('.$str.'))';
+				return $arg::class.'::__set_state(array('.$str.'))';
 			case 'array':
 				$str='';
 				$num=isset($arg[0]) &&
@@ -653,9 +649,7 @@ final class Base extends Prefab implements ArrayAccess {
 	function camelcase($str) {
 		return preg_replace_callback(
 			'/_(\w)/',
-			function($match) {
-				return strtoupper($match[1]);
-			},
+			fn($match) => strtoupper($match[1]),
 			$str
 		);
 	}
@@ -691,7 +685,7 @@ final class Base extends Prefab implements ArrayAccess {
 		foreach (preg_grep('/^'.$prefix.'/',array_keys($ref->getconstants()))
 			as $val) {
 			$out[$key=substr($val,strlen($prefix))]=
-				constant((is_object($class)?get_class($class):$class).'::'.$prefix.$key);
+				constant((is_object($class)?$class::class:$class).'::'.$prefix.$key);
 		}
 		unset($ref);
 		return $out;
@@ -993,12 +987,10 @@ final class Base extends Prefab implements ArrayAccess {
 	*	@param $arg mixed
 	**/
 	function serialize($arg) {
-		switch (strtolower($this->hive['SERIALIZER'])) {
-			case 'igbinary':
-				return igbinary_serialize($arg);
-			default:
-				return serialize($arg);
-		}
+		return match (strtolower($this->hive['SERIALIZER'])) {
+      'igbinary' => igbinary_serialize($arg),
+      default => serialize($arg),
+  };
 	}
 
 	/**
@@ -1007,12 +999,10 @@ final class Base extends Prefab implements ArrayAccess {
 	*	@param $arg mixed
 	**/
 	function unserialize($arg) {
-		switch (strtolower($this->hive['SERIALIZER'])) {
-			case 'igbinary':
-				return igbinary_unserialize($arg);
-			default:
-				return unserialize($arg);
-		}
+		return match (strtolower($this->hive['SERIALIZER'])) {
+      'igbinary' => igbinary_unserialize($arg),
+      default => unserialize($arg),
+  };
 	}
 
 	/**
@@ -1056,12 +1046,7 @@ final class Base extends Prefab implements ArrayAccess {
 	**/
 	function agent() {
 		$headers=$this->hive['HEADERS'];
-		return isset($headers['X-Operamini-Phone-UA'])?
-			$headers['X-Operamini-Phone-UA']:
-			(isset($headers['X-Skyfire-Phone'])?
-				$headers['X-Skyfire-Phone']:
-				(isset($headers['User-Agent'])?
-					$headers['User-Agent']:''));
+		return $headers['X-Operamini-Phone-UA'] ?? $headers['X-Skyfire-Phone'] ?? $headers['User-Agent'] ?? '';
 	}
 
 	/**
@@ -1080,12 +1065,7 @@ final class Base extends Prefab implements ArrayAccess {
 	**/
 	function ip() {
 		$headers=$this->hive['HEADERS'];
-		return isset($headers['Client-IP'])?
-			$headers['Client-IP']:
-			(isset($headers['X-Forwarded-For'])?
-				$headers['X-Forwarded-For']:
-				(isset($_SERVER['REMOTE_ADDR'])?
-					$_SERVER['REMOTE_ADDR']:''));
+		return $headers['Client-IP'] ?? $headers['X-Forwarded-For'] ?? $_SERVER['REMOTE_ADDR'] ?? '';
 	}
 
 	/**
@@ -1103,13 +1083,11 @@ final class Base extends Prefab implements ArrayAccess {
 		$debug=$this->hive['DEBUG'];
 		$trace=array_filter(
 			$trace,
-			function($frame) use($debug) {
-				return $debug && isset($frame['file']) &&
+			fn($frame) => $debug && isset($frame['file']) &&
 					($frame['file']!=__FILE__ || $debug>1) &&
 					(empty($frame['function']) ||
 					!preg_match('/^(?:(?:trigger|user)_error|'.
-						'__call|call_user_func)/',$frame['function']));
-			}
+						'__call|call_user_func)/',$frame['function']))
 		);
 		$out='';
 		$eol="\n";
@@ -1422,7 +1400,7 @@ final class Base extends Prefab implements ArrayAccess {
 					preg_match('/.+\/$/',$parts['path']))
 					$this->reroute(substr($parts['path'],0,-1).
 						(isset($parts['query'])?('?'.$parts['query']):''));
-				list($handler,$ttl,$kbps,$alias)=$route[$this->hive['VERB']];
+				[$handler, $ttl, $kbps, $alias]=$route[$this->hive['VERB']];
 				if (is_bool(strpos($pattern,'/*')))
 					foreach (array_keys($args) as $key)
 						if (is_numeric($key) && $key)
@@ -1438,9 +1416,7 @@ final class Base extends Prefab implements ArrayAccess {
 				if (is_string($handler)) {
 					// Replace route pattern tokens in handler if any
 					$handler=preg_replace_callback('/@(\w+\b)/',
-						function($id) use($args) {
-							return isset($args[$id[1]])?$args[$id[1]]:$id[0];
-						},
+						fn($id) => $args[$id[1]] ?? $id[0],
 						$handler
 					);
 					if (preg_match('/(.+)\h*(?:->|::)/',$handler,$match) &&
@@ -1466,7 +1442,7 @@ final class Base extends Prefab implements ArrayAccess {
 							die;
 						}
 						// Retrieve from cache backend
-						list($headers,$body,$result)=$data;
+						[$headers, $body, $result]=$data;
 						if (PHP_SAPI!='cli')
 							array_walk($headers,'header');
 						$this->expire($cached[0]+$ttl-$now);
@@ -1748,7 +1724,7 @@ final class Base extends Prefab implements ArrayAccess {
 						);
 						preg_match('/^(?<section>[^:]+)(?:\:(?<func>.+))?/',
 							$sec,$parts);
-						$func=isset($parts['func'])?$parts['func']:NULL;
+						$func=$parts['func'] ?? NULL;
 						$custom=(strtolower($parts['section'])!='globals');
 						if ($func)
 							$args=array($this->call($func,
@@ -1873,7 +1849,7 @@ final class Base extends Prefab implements ArrayAccess {
 		$func=NULL;
 		if (is_array($path=$this->hive['AUTOLOAD']) &&
 			isset($path[1]) && is_callable($path[1]))
-			list($path,$func)=$path;
+			[$path, $func]=$path;
 		foreach ($this->split($this->hive['PLUGINS'].';'.$path) as $auto)
 			if ($func && is_file($file=$func($auto.$class).'.php') ||
 				is_file($file=$auto.$class.'.php') ||
@@ -2029,7 +2005,7 @@ final class Base extends Prefab implements ArrayAccess {
 		$headers=array();
 		if (PHP_SAPI!='cli')
 			foreach (array_keys($_SERVER) as $key)
-				if (substr($key,0,5)=='HTTP_')
+				if (str_starts_with($key, 'HTTP_'))
 					$headers[strtr(ucwords(strtolower(strtr(
 						substr($key,5),'_',' '))),' ','-')]=&$_SERVER[$key];
 		if (isset($headers['X-HTTP-Method-Override']))
@@ -2097,7 +2073,7 @@ final class Base extends Prefab implements ArrayAccess {
 			'EXCEPTION'=>NULL,
 			'EXEMPT'=>NULL,
 			'FALLBACK'=>$this->fallback,
-			'FRAGMENT'=>isset($uri['fragment'])?$uri['fragment']:'',
+			'FRAGMENT'=>$uri['fragment'] ?? '',
 			'HALT'=>TRUE,
 			'HIGHLIGHT'=>TRUE,
 			'HOST'=>$_SERVER['SERVER_NAME'],
@@ -2118,7 +2094,7 @@ final class Base extends Prefab implements ArrayAccess {
 			'PORT'=>$port,
 			'PREFIX'=>NULL,
 			'PREMAP'=>'',
-			'QUERY'=>isset($uri['query'])?$uri['query']:'',
+			'QUERY'=>$uri['query'] ?? '',
 			'QUIET'=>FALSE,
 			'RAW'=>FALSE,
 			'REALM'=>$scheme.'://'.$_SERVER['SERVER_NAME'].
@@ -2212,7 +2188,7 @@ class Cache extends Prefab {
 				break;
 		}
 		if (!empty($raw)) {
-			list($val,$time,$ttl)=(array)$fw->unserialize($raw);
+			[$val, $time, $ttl]=(array)$fw->unserialize($raw);
 			if ($ttl===0 || $time+$ttl>microtime(TRUE))
 				return array($time,$ttl);
 			$val=null;
@@ -2235,25 +2211,18 @@ class Cache extends Prefab {
 		$ndx=$this->prefix.'.'.$key;
 		$time=microtime(TRUE);
 		if ($cached=$this->exists($key))
-			list($time,$ttl)=$cached;
+			[$time, $ttl]=$cached;
 		$data=$fw->serialize(array($val,$time,$ttl));
 		$parts=explode('=',$this->dsn,2);
-		switch ($parts[0]) {
-			case 'apc':
-			case 'apcu':
-				return apc_store($ndx,$data,$ttl);
-			case 'redis':
-				return $this->ref->set($ndx,$data,array('ex'=>$ttl));
-			case 'memcache':
-				return memcache_set($this->ref,$ndx,$data,0,$ttl);
-			case 'wincache':
-				return wincache_ucache_set($ndx,$data,$ttl);
-			case 'xcache':
-				return xcache_set($ndx,$data,$ttl);
-			case 'folder':
-				return $fw->write($parts[1].$ndx,$data);
-		}
-		return FALSE;
+  return match ($parts[0]) {
+      'apc', 'apcu' => apc_store($ndx,$data,$ttl),
+      'redis' => $this->ref->set($ndx,$data,array('ex'=>$ttl)),
+      'memcache' => memcache_set($this->ref,$ndx,$data,0,$ttl),
+      'wincache' => wincache_ucache_set($ndx,$data,$ttl),
+      'xcache' => xcache_set($ndx,$data,$ttl),
+      'folder' => $fw->write($parts[1].$ndx,$data),
+      default => FALSE,
+  };
 	}
 
 	/**
@@ -2275,22 +2244,15 @@ class Cache extends Prefab {
 			return;
 		$ndx=$this->prefix.'.'.$key;
 		$parts=explode('=',$this->dsn,2);
-		switch ($parts[0]) {
-			case 'apc':
-			case 'apcu':
-				return apc_delete($ndx);
-			case 'redis':
-				return $this->ref->del($ndx);
-			case 'memcache':
-				return memcache_delete($this->ref,$ndx);
-			case 'wincache':
-				return wincache_ucache_delete($ndx);
-			case 'xcache':
-				return xcache_unset($ndx);
-			case 'folder':
-				return @unlink($parts[1].$ndx);
-		}
-		return FALSE;
+  return match ($parts[0]) {
+      'apc', 'apcu' => apc_delete($ndx),
+      'redis' => $this->ref->del($ndx),
+      'memcache' => memcache_delete($this->ref,$ndx),
+      'wincache' => wincache_ucache_delete($ndx),
+      'xcache' => xcache_unset($ndx),
+      'folder' => @unlink($parts[1].$ndx),
+      default => FALSE,
+  };
 	}
 
 	/**
@@ -2374,7 +2336,7 @@ class Cache extends Prefab {
 				$port=6379;
 				$parts=explode(':',$parts[1],2);
 				if (count($parts)>1)
-					list($host,$port)=$parts;
+					[$host, $port]=$parts;
 				else
 					$host=$parts[0];
 				$this->ref=new Redis;
@@ -2387,7 +2349,7 @@ class Cache extends Prefab {
 					$port=11211;
 					$parts=explode(':',$server,2);
 					if (count($parts)>1)
-						list($host,$port)=$parts;
+						[$host, $port]=$parts;
 					else
 						$host=$parts[0];
 					if (empty($this->ref))
@@ -2441,9 +2403,7 @@ class View extends Prefab {
 	function esc($arg) {
 		$fw=Base::instance();
 		return $fw->recursive($arg,
-			function($val) use($fw) {
-				return is_string($val)?$fw->encode($val):$val;
-			}
+			fn($val) => is_string($val)?$fw->encode($val):$val
 		);
 	}
 
@@ -2455,9 +2415,7 @@ class View extends Prefab {
 	function raw($arg) {
 		$fw=Base::instance();
 		return $fw->recursive($arg,
-			function($val) use($fw) {
-				return is_string($val)?$fw->decode($val):$val;
-			}
+			fn($val) => is_string($val)?$fw->decode($val):$val
 		);
 	}
 
@@ -2594,9 +2552,7 @@ class Preview extends View {
 			},
 			preg_replace_callback(
 				'/\{~(.+?)~\}/s',
-				function($expr) use($self) {
-					return '<?php '.$self->token($expr[1]).' ?>';
-				},
+				fn($expr) => '<?php '.$self->token($expr[1]).' ?>',
 				$node
 			)
 		);

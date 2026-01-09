@@ -19,17 +19,17 @@
 			$tags = str_replace("&#039;","'",$row['tags']);
 			$tags = substr($tags,1,strlen($tags));
 			$tags = substr($tags,0,strlen($tags)-1);
-			if(strpos($tags,'&') !== false)
+			if(str_contains($tags,'&'))
 				$tags = str_replace("&", "&amp;", $tags);
-			if(strpos($tags,'>') !== false)
+			if(str_contains($tags,'>'))
 				$tags = str_replace(">", "&gt;", $tags);
-			if(strpos($tags,'<') !== false)
+			if(str_contains($tags,'<'))
 				$tags = str_replace("<", "&lt;", $tags);
-			if(strpos($tags,"'") !== false)
+			if(str_contains($tags,"'"))
 				$tags = str_replace("'", "&apos;", $tags);
-			if(strpos($tags,'"') !== false)
+			if(str_contains($tags,'"'))
 				$tags = str_replace('"', "&quot;", $tags);
-			if(strpos($tags,'\r') !== false)
+			if(str_contains($tags,'\r'))
 				$tags = str_replace('\r', "", $tags); 
 			$thumbnail_data = getimagesize("./thumbnails/".$row['directory']."/thumbnail_".$row['image']);
 			$thumb_width = $thumbnail_data[0];

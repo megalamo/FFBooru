@@ -21,7 +21,7 @@ if(isset($_POST['tag']) && $_POST['tag'] != "" && isset($_POST['alias']) && $_PO
 	}else{
 		//Add alias
 		$insert = $db->exec('INSERT INTO '.$f3->get('alias_table').' (tag, alias, status) VALUES(?, ?, \'pending\')',array(1=>$tag,2=>$alias));
-		$logger->log_action($f3->get('checked_user_id'), $_SERVER['REMOTE_ADDR'], 'ALIAS_ADD', 'SUCCESS', $db->lastInsertId());
+		$logger->log_action($_SERVER['REMOTE_ADDR'], 'ALIAS_ADD', $f3->get('checked_user_id'), 'SUCCESS', $db->lastInsertId());
 		$message = "Tag/alias combination has been requested successfully.";
 	}
 }

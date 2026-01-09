@@ -76,8 +76,7 @@ class Session {
 				'data'=>$data,
 				'csrf'=>$sent?$this->csrf():$csrf,
 				'ip'=>$fw->get('IP'),
-				'agent'=>isset($headers['User-Agent'])?
-					$headers['User-Agent']:'',
+				'agent'=>$headers['User-Agent'] ?? '',
 				'stamp'=>time()
 			),
 			$jar['expire']?($jar['expire']-time()):0
@@ -92,7 +91,7 @@ class Session {
 	**/
 	function destroy($id) {
 		Cache::instance()->clear($id.'.@');
-		setcookie(session_name(),'',strtotime('-1 year'));
+		setcookie(session_name(),'',['expires' => strtotime('-1 year')]);
 		unset($_COOKIE[session_name()]);
 		header_remove('Set-Cookie');
 		return TRUE;

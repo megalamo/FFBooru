@@ -2,12 +2,15 @@
     "name": "l337espeon/php-booru",
     "description": "Project for PHP-Booru imageboard engine.",
     "require": {
-        "monolog/monolog": "^1.19",
-        "bcosca/fatfree-core": "^3.5",
-        "guzzlehttp/guzzle": "^6.2",
+        "monolog/monolog": "^2.0|^3.0",
+        "bcosca/fatfree-core": "^3.7",
+        "guzzlehttp/guzzle": "^7.0",
         "phpspec/php-diff": "^1.1",
-        "php-ffmpeg/php-ffmpeg": "^0.6.1",
-        "symfony/var-dumper": "^3.1"
+        "php-ffmpeg/php-ffmpeg": "^1.0",
+        "symfony/var-dumper": "^5.0|^6.0|^7.0"
+    },
+    "require-dev": {
+        "rector/rector": "^1.0"
     },
     "authors": [
         {

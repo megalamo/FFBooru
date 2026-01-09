@@ -123,9 +123,9 @@ class Mapper extends \DB\Cursor {
 		$self=$this;
 		$str=preg_replace_callback(
 			'/(?<!\w)@(\w(?:[\w\.\[\]])*)/',
-			function($token) use($self) {
-				// Convert from JS dot notation to PHP array notation
-				return '$'.preg_replace_callback(
+			fn($token) =>
+       // Convert from JS dot notation to PHP array notation
+       '$'.preg_replace_callback(
 					'/(\.\w+)|\[((?:[^\[\]]*|(?R))*)\]/',
 					function($expr) use($self) {
 						$fw=\Base::instance();
@@ -140,8 +140,7 @@ class Mapper extends \DB\Cursor {
 							']';
 					},
 					$token[1]
-				);
-			},
+				),
 			$str
 		);
 		return trim($str);
@@ -248,7 +247,7 @@ class Mapper extends \DB\Cursor {
 								$val1[$col]=NULL;
 							if (!array_key_exists($col,$val2))
 								$val2[$col]=NULL;
-							list($v1,$v2)=array($val1[$col],$val2[$col]);
+							[$v1, $v2]=array($val1[$col],$val2[$col]);
 							if ($out=strnatcmp($v1,$v2)*
 								(($order==SORT_ASC)*2-1))
 								return $out;

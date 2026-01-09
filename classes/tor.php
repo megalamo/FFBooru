@@ -126,7 +126,7 @@ class tor
         if($_SERVER["HTTP_CF_IPCOUNTRY"] == "T1"){
           $isActive = true;
         }
-        
+
         //Send back status
         $this->cache[$this->target] = $isActive;
         return $this->cache[$this->target];

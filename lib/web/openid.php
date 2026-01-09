@@ -46,7 +46,7 @@ class OpenID extends \Magic {
 			(isset($url['user'])?
 				($url['user'].
 				(isset($url['pass'])?(':'.$url['pass']):'').'@'):'').
-			strtolower($url['host']).(isset($url['path'])?$url['path']:'/').
+			strtolower($url['host']).($url['path'] ?? '/').
 			(isset($url['query'])?('?'.$url['query']):'');
 		// HTML-based discovery of OpenID provider
 		$req=\Web::instance()->
@@ -91,7 +91,7 @@ class OpenID extends \Magic {
 							PREG_SET_ORDER)) {
 						$node=array();
 						foreach ($attr as $kv)
-							$node[$kv[1]]=isset($kv[2])?$kv[2]:$kv[3];
+							$node[$kv[1]]=$kv[2] ?? $kv[3];
 						if (isset($node['rel']) &&
 							preg_match('/openid2?\.(\w+)/',
 								$node['rel'],$var) &&

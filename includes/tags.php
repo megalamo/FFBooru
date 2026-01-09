@@ -129,7 +129,7 @@
 	$category_field .= "</select><br/>";
 
 
-	if(strpos($_GET["tags"], " ") !== false)
+	if(str_contains($_GET["tags"], " "))
 		echo "<div style='background-color:#E44;font-size:large;'>Extra tags will be ignored</div>";
 	echo "<form method='get' action='index.php?page=tags&s=list'>
 		<input type='hidden' value='tags' name='page' />

@@ -204,7 +204,7 @@ class Markdown extends Prefab {
 	*	@param $type string
 	**/
 	protected function _setext($str,$type) {
-		$level=strpos('=-',$type)+1;
+		$level=strpos('=-',(string) $type)+1;
 		return '<h'.$level.' id="'.Web::instance()->slug($str).'">'.
 			$this->scan($str).'</h'.$level.'>'."\n\n";
 	}
@@ -350,15 +350,13 @@ class Markdown extends Prefab {
 		$self=$this;
 		return preg_replace_callback(
 			'/!(?:\[(.+?)\])?\h*\(<?(.*?)>?(?:\h*"(.*?)"\h*)?\)/',
-			function($expr) use($self) {
-				return '<img src="'.$expr[2].'"'.
+			fn($expr) => '<img src="'.$expr[2].'"'.
 					(empty($expr[1])?
 						'':
 						(' alt="'.$self->esc($expr[1]).'"')).
 					(empty($expr[3])?
 						'':
-						(' title="'.$self->esc($expr[3]).'"')).' />';
-			},
+						(' title="'.$self->esc($expr[3]).'"')).' />',
 			$str
 		);
 	}
@@ -372,13 +370,11 @@ class Markdown extends Prefab {
 		$self=$this;
 		return preg_replace_callback(
 			'/(?<!\\\\)\[(.+?)(?!\\\\)\]\h*\(<?(.*?)>?(?:\h*"(.*?)"\h*)?\)/',
-			function($expr) use($self) {
-				return '<a href="'.$self->esc($expr[2]).'"'.
+			fn($expr) => '<a href="'.$self->esc($expr[2]).'"'.
 					(empty($expr[3])?
 						'':
 						(' title="'.$self->esc($expr[3]).'"')).
-					'>'.$self->scan($expr[1]).'</a>';
-			},
+					'>'.$self->scan($expr[1]).'</a>',
 			$str
 		);
 	}
@@ -412,10 +408,8 @@ class Markdown extends Prefab {
 		$self=$this;
 		return preg_replace_callback(
 			'/`` (.+?) ``|(?<!\\\\)`(.+?)(?!\\\\)`/',
-			function($expr) use($self) {
-				return '<code>'.
-					$self->esc(empty($expr[1])?$expr[2]:$expr[1]).'</code>';
-			},
+			fn($expr) => '<code>'.
+					$self->esc(empty($expr[1])?$expr[2]:$expr[1]).'</code>',
 			$str
 		);
 	}
@@ -509,8 +503,7 @@ class Markdown extends Prefab {
 						'/(?<!\\\\)\[('.$ref.')(?!\\\\)\]\s*\[\]|'.
 						'(!?)(?:\[([^\[\]]+)\]\s*)?'.
 						'(?<!\\\\)\[('.$ref.')(?!\\\\)\]/',
-						function($expr) use($match,$self) {
-							return (empty($expr[2]))?
+						fn($expr) => (empty($expr[2]))?
 								// Anchor
 								('<a href="'.$self->esc($match[2]).'"'.
 								(empty($match[3])?
@@ -535,8 +528,7 @@ class Markdown extends Prefab {
 									'':
 									(' title="'.
 										$self->esc($match[3]).'"')).
-								' />');
-						},
+								' />'),
 						$tmp=$dst
 					);
 				}
@@ -565,10 +557,9 @@ class Markdown extends Prefab {
 			'/(<code.*?>.+?<\/code>|'.
 			'<[^>\n]+>|\([^\n\)]+\)|"[^"\n]+")|'.
 			'\\\\(.)/s',
-			function($expr) {
-				// Process escaped characters
-				return empty($expr[1])?$expr[2]:$expr[1];
-			},
+			fn($expr) =>
+       // Process escaped characters
+       empty($expr[1])?$expr[2]:$expr[1],
 			$this->build(preg_replace('/\r\n|\r/',"\n",$txt))
 		);
 		return $this->snip($txt);

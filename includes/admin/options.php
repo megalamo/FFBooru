@@ -6,7 +6,7 @@ $f3->set('user',$user);
 
 //Check if user is an admin
 if(!$user->gotpermission('is_admin')){
-    $logger->log_action($f3->get('checked_user_id'), $_SERVER['REMOTE_ADDR'], 'ADMIN_ADD_GROUP', 'NO_ACCESS');
+    $logger->log_action($_SERVER['REMOTE_ADDR'], 'ADMIN_ADD_GROUP', $f3->get('checked_user_id'), 'NO_ACCESS');
 	$template=new Template;
     echo $template->render('no_permission.html');
 	exit();

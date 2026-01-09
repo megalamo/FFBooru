@@ -97,7 +97,7 @@ class Web extends Prefab {
 		foreach (explode(',',str_replace(' ','',@$_SERVER['HTTP_ACCEPT']))
 			as $mime)
 			if (preg_match('/(.+?)(?:;q=([\d\.]+)|$)/',$mime,$parts))
-				$accept[$parts[1]]=isset($parts[2])?$parts[2]:1;
+				$accept[$parts[1]]=$parts[2] ?? 1;
 		if (!$accept)
 			$accept['*/*']=1;
 		else {
@@ -194,7 +194,7 @@ class Web extends Prefab {
 						(is_callable($slug)?
 							$slug($base):
 							($this->slug($parts[1]).
-								(isset($parts[2])?$parts[2]:''))):
+								($parts[2] ?? ''))):
 						$base),
 				'tmp_name'=>$tmp,
 				'type'=>$this->mime($base),
@@ -227,7 +227,7 @@ class Web extends Prefab {
 						(is_callable($slug)?
 							$slug($base,$name):
 							($this->slug($parts[1]).
-								(isset($parts[2])?$parts[2]:''))):
+								($parts[2] ?? ''))):
 						$base);
 				$out[$file['name']]=!$file['error'] &&
 					is_uploaded_file($file['tmp_name']) &&
@@ -269,9 +269,7 @@ class Web extends Prefab {
 		if (isset($options['content']))
 			curl_setopt($curl,CURLOPT_POSTFIELDS,$options['content']);
 		curl_setopt($curl,CURLOPT_ENCODING,'gzip,deflate');
-		$timeout=isset($options['timeout'])?
-			$options['timeout']:
-			ini_get('default_socket_timeout');
+		$timeout=$options['timeout'] ?? ini_get('default_socket_timeout');
 		curl_setopt($curl,CURLOPT_CONNECTTIMEOUT,$timeout);
 		curl_setopt($curl,CURLOPT_TIMEOUT,$timeout);
 		$headers=array();
@@ -307,8 +305,7 @@ class Web extends Prefab {
 		$options['header']=implode($eol,$options['header']);
 		$body=@file_get_contents($url,FALSE,
 			stream_context_create(array('http'=>$options)));
-		$headers=isset($http_response_header)?
-			$http_response_header:array();
+		$headers=$http_response_header ?? array();
 		$match=NULL;
 		foreach ($headers as $header)
 			if (preg_match('/Content-Encoding: (.+)/',$header,$match))
@@ -373,7 +370,7 @@ class Web extends Prefab {
 			$content.=$str;
 		fclose($socket);
 		$html=explode($eol.$eol,$content,2);
-		$body=isset($html[1])?$html[1]:'';
+		$body=$html[1] ?? '';
 		$headers=array_merge($headers,$current=explode($eol,$html[0]));
 		$match=NULL;
 		foreach ($current as $header)
@@ -420,7 +417,7 @@ class Web extends Prefab {
 		foreach ($flags as $key=>$val)
 			if ($val)
 				return $this->wrapper=$key;
-		user_error(E_Request,E_USER_ERROR);
+		user_error(\E_REQUEST,E_USER_ERROR);
 	}
 
 	/**
@@ -480,9 +477,7 @@ class Web extends Prefab {
 		$this->subst($options['header'],
 			array(
 				'Accept-Encoding: gzip,deflate',
-				'User-Agent: '.(isset($options['user_agent'])?
-					$options['user_agent']:
-					'Mozilla/5.0 (compatible; '.php_uname('s').')'),
+				'User-Agent: '.($options['user_agent'] ?? 'Mozilla/5.0 (compatible; '.php_uname('s').')'),
 				'Connection: close'
 			)
 		);

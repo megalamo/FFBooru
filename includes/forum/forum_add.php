@@ -6,7 +6,7 @@ $ip = $_SERVER['REMOTE_ADDR'];
 
 //Check if user is banned
 if($user->banned_ip($ip)){
-    $logger->log_action($f3->get('checked_user_id'), $_SERVER['REMOTE_ADDR'], 'FORUM_ADD', 'BANNED');
+    $logger->log_action($_SERVER['REMOTE_ADDR'], 'FORUM_ADD', $f3->get('checked_user_id'), 'BANNED');
 	$template=new Template;
     echo $template->render('no_permission.html');
 	exit();
@@ -14,7 +14,7 @@ if($user->banned_ip($ip)){
 
 //Check if user is logged in
 if(!$user->check_log()){
-    $logger->log_action($f3->get('checked_user_id'), $_SERVER['REMOTE_ADDR'], 'FORUM_ADD', 'NOT_LOGGED_IN');
+    $logger->log_action($_SERVER['REMOTE_ADDR'], 'FORUM_ADD', $f3->get('checked_user_id'), 'NOT_LOGGED_IN');
 	$template=new Template;
     echo $template->render('no_permission.html');
 	exit();
@@ -60,7 +60,7 @@ if($f3->get('PARAMS.type') == "post"){
 			$ppid = 1;
 		}
 		//Done, redirect the user to the page their post is on
-		$logger->log_action($f3->get('checked_user_id'), $_SERVER['REMOTE_ADDR'], 'FORUM_ADD_POST', 'SUCCESS', $pid);
+		$logger->log_action($_SERVER['REMOTE_ADDR'], 'FORUM_ADD_POST', $f3->get('checked_user_id'), 'SUCCESS', $pid);
 		$f3->reroute('/forum/view/'.$pid.'/'.$ppid.'#'.$id);
 	}	
 }else{
@@ -85,7 +85,7 @@ if($f3->get('PARAMS.type') == "post"){
 		//Update creation post id for topic now that we have it
         $update = $db->exec('UPDATE '.$f3->get('forum_topic_table').' SET creation_post = ? WHERE id = ?',array(1=>$id,2=>$pid));
         //Done, redirect the user to the page their post is on
-        $logger->log_action($f3->get('checked_user_id'), $_SERVER['REMOTE_ADDR'], 'FORUM_ADD_TOPIC', 'SUCCESS', $pid);
+        $logger->log_action($_SERVER['REMOTE_ADDR'], 'FORUM_ADD_TOPIC', $f3->get('checked_user_id'), 'SUCCESS', $pid);
         $f3->reroute('/forum/view/'.$pid.'#'.$id);
 	}
 }

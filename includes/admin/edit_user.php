@@ -6,7 +6,7 @@ $f3->set('user',$user);
 
 //Check if user is an admin
 if(!$user->gotpermission('is_admin')){
-    $logger->log_action($f3->get('checked_user_id'), $_SERVER['REMOTE_ADDR'], 'ADMIN_EDIT_USER', 'NO_ACCESS');
+    $logger->log_action($_SERVER['REMOTE_ADDR'], 'ADMIN_EDIT_USER', $f3->get('checked_user_id'), 'NO_ACCESS');
 	$template=new Template;
     echo $template->render('no_permission.html');
 	exit();
@@ -30,11 +30,11 @@ if(isset($_POST['password']) && isset($_POST['group']) && is_numeric($_POST['gro
 	//Check if update query was successful
 	if($update){
 		//Success
-		$logger->log_action($f3->get('checked_user_id'), $_SERVER['REMOTE_ADDR'], 'ADMIN_EDIT_USER', 'SUCCESS', $userid);
+		$logger->log_action($_SERVER['REMOTE_ADDR'], 'ADMIN_EDIT_USER', $f3->get('checked_user_id'), 'SUCCESS', $userid);
 		$f3->reroute('/admin/edit_user');
 	}else{
 		//Fail
-		$logger->log_action($f3->get('checked_user_id'), $_SERVER['REMOTE_ADDR'], 'ADMIN_EDIT_USER', 'DB_ERROR', $userid);
+		$logger->log_action($_SERVER['REMOTE_ADDR'], 'ADMIN_EDIT_USER', $f3->get('checked_user_id'), 'DB_ERROR', $userid);
 		$f3->reroute('/admin/edit_user');
 	}
 }else if(isset($_POST['user']) && $_POST['user'] !== ""){

@@ -25,9 +25,9 @@
 	asort($ttags);
 	$tags = implode(" ",$ttags);
 	$tags = mb_trim(str_replace("  ","",$tags));
-	if(substr($tags,0,1) != " ")
+	if(!str_starts_with($tags, " "))
 		$tags = " $tags";
-	if(substr($tags,-1,1) != " ")
+	if(!str_ends_with($tags, " "))
 		$tags = "$tags ";
 	$parent = '';
 	$query = "SELECT tags FROM $post_table WHERE id='$id'";
@@ -58,7 +58,7 @@
 				header('Location: ../index.php');
 				exit;
 			}
-			if(strpos($current,'parent:') !== false)
+			if(str_contains($current,'parent:'))
 			{
 				$parent = str_replace("parent:","",$current);
 				if(!is_numeric($parent))
@@ -99,9 +99,9 @@
 		foreach($ttags as $current)
 			$tclass->addindextag($current);
 		$tags = implode(" ",$ttags);
-		if(substr($tags,0,1) != " ")
+		if(!str_starts_with($tags, " "))
 			$tags = " $tags";
-		if(substr($tags,-1,1) != " ")
+		if(!str_ends_with($tags, " "))
 			$tags = "$tags ";
 		$date = date("Y-m-d H:i:s");
 		$new_tags = str_replace($row['tags'],"",$tags);

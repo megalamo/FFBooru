@@ -7,128 +7,161 @@ namespace Composer\Autoload;
 class ComposerStaticInit1b43a07b618dac6d15f08f2102d2dfb0
 {
     public static $files = array (
-        'c964ee0ededf28c96ebd9db5099ef910' => __DIR__ . '/..' . '/guzzlehttp/promises/src/functions_include.php',
-        'a0edc8309cc5e1d60e3047b5df6b7052' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/functions_include.php',
+        '7b11c4dc42b3b3023073cb14e519683c' => __DIR__ . '/..' . '/ralouphie/getallheaders/src/getallheaders.php',
+        'a4a119a56e50fbb293281d9a48007e0e' => __DIR__ . '/..' . '/symfony/polyfill-php80/bootstrap.php',
+        '9b38cf48e83f5d8f60375221cd213eee' => __DIR__ . '/..' . '/phpstan/phpstan/bootstrap.php',
+        '6e3fae29631ef280660b3cdad06f25a8' => __DIR__ . '/..' . '/symfony/deprecation-contracts/function.php',
         '0e6d7bf4a5811bfa5cf40c5ccd6fae6a' => __DIR__ . '/..' . '/symfony/polyfill-mbstring/bootstrap.php',
         '37a3dc5111fe8f707ab4c132ef1dbc62' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/functions_include.php',
+        '38143a9afc50997d55e4815db8489d1c' => __DIR__ . '/..' . '/rector/rector/bootstrap.php',
         '667aeda72477189d0494fecd327c3641' => __DIR__ . '/..' . '/symfony/var-dumper/Resources/functions/dump.php',
     );
 
     public static $prefixLengthsPsr4 = array (
-        'S' => 
+        'S' =>
         array (
+            'Symfony\\Polyfill\\Php80\\' => 23,
             'Symfony\\Polyfill\\Mbstring\\' => 26,
+            'Symfony\\Contracts\\Service\\' => 26,
+            'Symfony\\Contracts\\Cache\\' => 24,
+            'Symfony\\Component\\VarExporter\\' => 30,
             'Symfony\\Component\\VarDumper\\' => 28,
             'Symfony\\Component\\Process\\' => 26,
-            'Symfony\\Component\\Filesystem\\' => 29,
+            'Symfony\\Component\\Cache\\' => 24,
+            'Spatie\\TemporaryDirectory\\' => 26,
         ),
-        'P' => 
+        'P' =>
         array (
             'Psr\\Log\\' => 8,
             'Psr\\Http\\Message\\' => 17,
+            'Psr\\Http\\Client\\' => 16,
+            'Psr\\Container\\' => 14,
+            'Psr\\Cache\\' => 10,
         ),
-        'M' => 
+        'M' =>
         array (
             'Monolog\\' => 8,
         ),
-        'G' => 
+        'G' =>
         array (
             'GuzzleHttp\\Psr7\\' => 16,
             'GuzzleHttp\\Promise\\' => 19,
             'GuzzleHttp\\' => 11,
         ),
-        'D' => 
+        'F' =>
         array (
-            'Doctrine\\Common\\Cache\\' => 22,
+            'FFMpeg\\' => 7,
+        ),
+        'E' =>
+        array (
+            'Evenement\\' => 10,
+        ),
+        'A' =>
+        array (
+            'Alchemy\\BinaryDriver\\' => 21,
         ),
     );
 
     public static $prefixDirsPsr4 = array (
-        'Symfony\\Polyfill\\Mbstring\\' => 
+        'Symfony\\Polyfill\\Php80\\' =>
+        array (
+            0 => __DIR__ . '/..' . '/symfony/polyfill-php80',
+        ),
+        'Symfony\\Polyfill\\Mbstring\\' =>
         array (
             0 => __DIR__ . '/..' . '/symfony/polyfill-mbstring',
         ),
-        'Symfony\\Component\\VarDumper\\' => 
+        'Symfony\\Contracts\\Service\\' =>
+        array (
+            0 => __DIR__ . '/..' . '/symfony/service-contracts',
+        ),
+        'Symfony\\Contracts\\Cache\\' =>
+        array (
+            0 => __DIR__ . '/..' . '/symfony/cache-contracts',
+        ),
+        'Symfony\\Component\\VarExporter\\' =>
+        array (
+            0 => __DIR__ . '/..' . '/symfony/var-exporter',
+        ),
+        'Symfony\\Component\\VarDumper\\' =>
         array (
             0 => __DIR__ . '/..' . '/symfony/var-dumper',
         ),
-        'Symfony\\Component\\Process\\' => 
+        'Symfony\\Component\\Process\\' =>
         array (
             0 => __DIR__ . '/..' . '/symfony/process',
         ),
-        'Symfony\\Component\\Filesystem\\' => 
+        'Symfony\\Component\\Cache\\' =>
         array (
-            0 => __DIR__ . '/..' . '/symfony/filesystem',
+            0 => __DIR__ . '/..' . '/symfony/cache',
         ),
-        'Psr\\Log\\' => 
+        'Spatie\\TemporaryDirectory\\' =>
         array (
-            0 => __DIR__ . '/..' . '/psr/log/Psr/Log',
+            0 => __DIR__ . '/..' . '/spatie/temporary-directory/src',
         ),
-        'Psr\\Http\\Message\\' => 
+        'Psr\\Log\\' =>
         array (
-            0 => __DIR__ . '/..' . '/psr/http-message/src',
+            0 => __DIR__ . '/..' . '/psr/log/src',
         ),
-        'Monolog\\' => 
+        'Psr\\Http\\Message\\' =>
+        array (
+            0 => __DIR__ . '/..' . '/psr/http-factory/src',
+            1 => __DIR__ . '/..' . '/psr/http-message/src',
+        ),
+        'Psr\\Http\\Client\\' =>
+        array (
+            0 => __DIR__ . '/..' . '/psr/http-client/src',
+        ),
+        'Psr\\Container\\' =>
+        array (
+            0 => __DIR__ . '/..' . '/psr/container/src',
+        ),
+        'Psr\\Cache\\' =>
+        array (
+            0 => __DIR__ . '/..' . '/psr/cache/src',
+        ),
+        'Monolog\\' =>
         array (
             0 => __DIR__ . '/..' . '/monolog/monolog/src/Monolog',
         ),
-        'GuzzleHttp\\Psr7\\' => 
+        'GuzzleHttp\\Psr7\\' =>
         array (
             0 => __DIR__ . '/..' . '/guzzlehttp/psr7/src',
         ),
-        'GuzzleHttp\\Promise\\' => 
+        'GuzzleHttp\\Promise\\' =>
         array (
             0 => __DIR__ . '/..' . '/guzzlehttp/promises/src',
         ),
-        'GuzzleHttp\\' => 
+        'GuzzleHttp\\' =>
         array (
             0 => __DIR__ . '/..' . '/guzzlehttp/guzzle/src',
         ),
-        'Doctrine\\Common\\Cache\\' => 
+        'FFMpeg\\' =>
         array (
-            0 => __DIR__ . '/..' . '/doctrine/cache/lib/Doctrine/Common/Cache',
+            0 => __DIR__ . '/..' . '/php-ffmpeg/php-ffmpeg/src/FFMpeg',
+        ),
+        'Evenement\\' =>
+        array (
+            0 => __DIR__ . '/..' . '/evenement/evenement/src',
+        ),
+        'Alchemy\\BinaryDriver\\' =>
+        array (
+            0 => __DIR__ . '/..' . '/php-ffmpeg/php-ffmpeg/src/Alchemy/BinaryDriver',
         ),
     );
 
     public static $prefixesPsr0 = array (
-        'N' => 
+        'D' =>
         array (
-            'Neutron' => 
-            array (
-                0 => __DIR__ . '/..' . '/neutron/temporary-filesystem/src',
-            ),
-        ),
-        'F' => 
-        array (
-            'FFMpeg' => 
-            array (
-                0 => __DIR__ . '/..' . '/php-ffmpeg/php-ffmpeg/src',
-            ),
-        ),
-        'E' => 
-        array (
-            'Evenement' => 
-            array (
-                0 => __DIR__ . '/..' . '/evenement/evenement/src',
-            ),
-        ),
-        'D' => 
-        array (
-            'Diff' => 
+            'Diff' =>
             array (
                 0 => __DIR__ . '/..' . '/phpspec/php-diff/lib',
-            ),
-        ),
-        'A' => 
-        array (
-            'Alchemy' => 
-            array (
-                0 => __DIR__ . '/..' . '/alchemy/binary-driver/src',
             ),
         ),
     );
 
     public static $classMap = array (
+        'Attribute' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/Attribute.php',
         'Audit' => __DIR__ . '/..' . '/bcosca/fatfree-core/audit.php',
         'Auth' => __DIR__ . '/..' . '/bcosca/fatfree-core/auth.php',
         'Base' => __DIR__ . '/..' . '/bcosca/fatfree-core/base.php',
@@ -155,17 +188,23 @@ class ComposerStaticInit1b43a07b618dac6d15f08f2102d2dfb0
         'Magic' => __DIR__ . '/..' . '/bcosca/fatfree-core/magic.php',
         'Markdown' => __DIR__ . '/..' . '/bcosca/fatfree-core/markdown.php',
         'Matrix' => __DIR__ . '/..' . '/bcosca/fatfree-core/matrix.php',
+        'PhpToken' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/PhpToken.php',
         'Prefab' => __DIR__ . '/..' . '/bcosca/fatfree-core/base.php',
         'Preview' => __DIR__ . '/..' . '/bcosca/fatfree-core/base.php',
         'Registry' => __DIR__ . '/..' . '/bcosca/fatfree-core/base.php',
         'SMTP' => __DIR__ . '/..' . '/bcosca/fatfree-core/smtp.php',
         'Session' => __DIR__ . '/..' . '/bcosca/fatfree-core/session.php',
+        'SessionAdapter' => __DIR__ . '/..' . '/bcosca/fatfree-core/sessionadapter.php',
+        'Stringable' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/Stringable.php',
         'Template' => __DIR__ . '/..' . '/bcosca/fatfree-core/template.php',
         'Test' => __DIR__ . '/..' . '/bcosca/fatfree-core/test.php',
         'UTF' => __DIR__ . '/..' . '/bcosca/fatfree-core/utf.php',
+        'UnhandledMatchError' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/UnhandledMatchError.php',
+        'ValueError' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/ValueError.php',
         'View' => __DIR__ . '/..' . '/bcosca/fatfree-core/base.php',
         'Web' => __DIR__ . '/..' . '/bcosca/fatfree-core/web.php',
         'Web\\Geo' => __DIR__ . '/..' . '/bcosca/fatfree-core/web/geo.php',
+        'Web\\Google\\Recaptcha' => __DIR__ . '/..' . '/bcosca/fatfree-core/web/google/recaptcha.php',
         'Web\\Google\\StaticMap' => __DIR__ . '/..' . '/bcosca/fatfree-core/web/google/staticmap.php',
         'Web\\OAuth2' => __DIR__ . '/..' . '/bcosca/fatfree-core/web/oauth2.php',
         'Web\\OpenID' => __DIR__ . '/..' . '/bcosca/fatfree-core/web/openid.php',

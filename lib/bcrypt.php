@@ -72,7 +72,7 @@ class Bcrypt extends Prefab {
 	*	@param $cost int
 	**/
 	function needs_rehash($hash,$cost=self::COST) {
-		list($pwcost)=sscanf($hash,"$2y$%d$");
+		[$pwcost]=sscanf($hash,"$2y$%d$");
 		return $pwcost<$cost;
 	}
 

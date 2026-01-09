@@ -39,7 +39,7 @@
 		if ($numrows%$limit) 
 			$pages++;
 		$current = ($page/$limit) + 1;
-		if ($pages < 1 || $pages == 0 || $pages == "")
+		if ($pages < 1 || $pages == 0 || $pages == 0)
 			$total = 1;
 		else
 			$total = $pages;

@@ -181,9 +181,7 @@ class Mapper extends \DB\Cursor {
 		if (!$obj)
 			$obj=$this;
 		return array_map(
-			function($row) {
-				return $row['value'];
-			},
+			fn($row) => $row['value'],
 			$obj->fields+$obj->adhoc
 		);
 	}
@@ -214,31 +212,25 @@ class Mapper extends \DB\Cursor {
 					$filter[1]:
 					array_slice($filter,1,NULL,TRUE);
 				$args=is_array($args)?$args:array(1=>$args);
-				list($filter)=$filter;
+				[$filter]=$filter;
 			}
 			$sql.=' WHERE '.$filter;
 		}
 		if ($options['group']) {
 			$sql.=' GROUP BY '.implode(',',array_map(
-				function($str) use($db) {
-					return preg_replace_callback(
+				fn($str) => preg_replace_callback(
 						'/\b(\w+)\h*(HAVING.+|$)/i',
-						function($parts) use($db) {
-							return $db->quotekey($parts[1]);
-						},
+						fn($parts) => $db->quotekey($parts[1]),
 						$str
-					);
-				},
+					),
 				explode(',',$options['group'])));
 		}
 		if ($options['order']) {
 			$sql.=' ORDER BY '.implode(',',array_map(
-				function($str) use($db) {
-					return preg_match('/^(\w+)(?:\h+(ASC|DESC))?\h*(?:,|$)/i',
+				fn($str) => preg_match('/^(\w+)(?:\h+(ASC|DESC))?\h*(?:,|$)/i',
 						$str,$parts)?
 						($db->quotekey($parts[1]).
-						(isset($parts[2])?(' '.$parts[2]):'')):$str;
-				},
+						(isset($parts[2])?(' '.$parts[2]):'')):$str,
 				explode(',',$options['order'])));
 		}
 		if (preg_match('/mssql|sqlsrv|odbc/', $this->engine) &&
@@ -334,7 +326,7 @@ class Mapper extends \DB\Cursor {
 					$filter[1]:
 					array_slice($filter,1,NULL,TRUE);
 				$args=is_array($args)?$args:array(1=>$args);
-				list($filter)=$filter;
+				[$filter]=$filter;
 			}
 			$sql.=' WHERE '.$filter;
 		}
@@ -489,7 +481,7 @@ class Mapper extends \DB\Cursor {
 					$filter[1]:
 					array_slice($filter,1,NULL,TRUE);
 				$args=is_array($args)?$args:array(1=>$args);
-				list($filter)=$filter;
+				[$filter]=$filter;
 			}
 			return $this->db->
 				exec('DELETE FROM '.$this->table.' WHERE '.$filter.';',$args);

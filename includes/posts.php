@@ -9,7 +9,7 @@ $limit = 20;
 
 //Check if user is an admin
 if(!$user->gotpermission('is_admin')){
-    $logger->log_action($f3->get('checked_user_id'), $_SERVER['REMOTE_ADDR'], 'ADMIN_POSTS', 'NO_ACCESS');
+    $logger->log_action($_SERVER['REMOTE_ADDR'], 'ADMIN_POSTS', $f3->get('checked_user_id'), 'NO_ACCESS');
 	$template=new Template;
     echo $template->render('no_permission.html');
 	exit();
@@ -25,7 +25,7 @@ if($f3->get('PARAMS.reportid') !== null && is_numeric($f3->get('PARAMS.reportid'
 	if($update){
 		//Post unflagged
 		$message = "Unflagged post!";
-		$logger->log_action($f3->get('checked_user_id'), $_SERVER['REMOTE_ADDR'], 'ADMIN_UNFLAG_POST', 'SUCCESS', $post_id);
+		$logger->log_action($_SERVER['REMOTE_ADDR'], 'ADMIN_UNFLAG_POST', $f3->get('checked_user_id'), 'SUCCESS', $post_id);
 	}
 }
 

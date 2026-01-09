@@ -84,16 +84,12 @@ class SQL {
 	*	@param $val scalar
 	**/
 	function type($val) {
-		switch (gettype($val)) {
-			case 'NULL':
-				return \PDO::PARAM_NULL;
-			case 'boolean':
-				return \PDO::PARAM_BOOL;
-			case 'integer':
-				return \PDO::PARAM_INT;
-			default:
-				return \PDO::PARAM_STR;
-		}
+		return match (gettype($val)) {
+      'NULL' => \PDO::PARAM_NULL,
+      'boolean' => \PDO::PARAM_BOOL,
+      'integer' => \PDO::PARAM_INT,
+      default => \PDO::PARAM_STR,
+  };
 	}
 
 	/**
@@ -105,7 +101,7 @@ class SQL {
 	function value($type,$val) {
 		switch ($type) {
 			case \PDO::PARAM_NULL:
-				return (unset)$val;
+				return null;
 			case \PDO::PARAM_INT:
 				return (int)$val;
 			case \PDO::PARAM_BOOL:
@@ -261,7 +257,7 @@ class SQL {
 	**/
 	function schema($table,$fields=NULL,$ttl=0) {
 		if (strpos($table,'.'))
-			list($schema,$table)=explode('.',$table);
+			[$schema, $table]=explode('.',$table);
 		// Supported engines
 		$cmd=array(
 			'sqlite2?'=>array(

@@ -33,7 +33,7 @@
 				if($user != "Anonymous"){
 					$update1 = $db->exec('UPDATE '.$f3->get('user_table').' SET comment_count = comment_count + 1 WHERE id = ?',array(1=>$f3->get('checked_user_id')));
 				}
-				$logger->log_action($f3->get('checked_user_id'), $ip, 'COMMENT_ADD', 'SUCCESS', $id);
+				$logger->log_action($ip, 'COMMENT_ADD', $f3->get('checked_user_id'), 'SUCCESS', $id);
 				$f3->reroute('/post/view/'.$id);
 			}else{
 				$f3->reroute('/post/view/'.$id);
@@ -65,7 +65,7 @@
 				$posted_at = $result[0]['posted_at'];
 				$edit_limit = ($f3->get('edit_limit') * 60) + $posted_at;
 				$update = $db->exec('UPDATE '.$f3->get('comment_table').' SET comment = ?, edited_at = NOW() WHERE user = ? AND id = ? AND posted_at <= ?',array(1=>$comment,2=>$f3->get('checked_user_id'),3=>$id,4=>$edit_limit));
-				$logger->log_action($f3->get('checked_user_id'), $_SERVER['REMOTE_ADDR'], 'COMMENT_EDIT', 'SUCCESS', $id);
+				$logger->log_action($_SERVER['REMOTE_ADDR'], 'COMMENT_EDIT', $f3->get('checked_user_id'), 'SUCCESS', $id);
 				$f3->reroute('/post/view/'.$id);
 			}else{
 				$f3->reroute('/post/view/'.$id);
@@ -97,14 +97,14 @@
 			if($count < 1){
 				//Add vote
 				$insert = $db->exec('INSERT INTO '.$f3->get('comment_vote_table').' (ip,post_id,comment_id) VALUES(?, ?, ?)',array(1=>$ip,2=>$id,3=>$cid));
-				$logger->log_action($f3->get('checked_user_id'), $ip, 'COMMENT_VOTE', 'SUCCESS_NEW', $id, $cid);
+				$logger->log_action($ip, 'COMMENT_VOTE', $f3->get('checked_user_id'), 'SUCCESS_NEW', $id);
 				//Change vote count
 				if($vote == "up"){
 					$update = $db->exec('UPDATE '.$f3->get('comment_table').' SET score=score + 1 WHERE id = ? AND post_id = ?',array(1=>$cid,2=>$id));
-					$logger->log_action($f3->get('checked_user_id'), $ip, 'COMMENT_VOTE', 'SUCCESS_UP', $id, $cid);
+					$logger->log_action($ip, 'COMMENT_VOTE', $f3->get('checked_user_id'), 'SUCCESS_UP', $id);
 				}else{
 					$update = $db->exec('UPDATE '.$f3->get('comment_table').' SET score=score - 1 WHERE id = ? AND post_id = ?',array(1=>$cid,2=>$id));
-					$logger->log_action($f3->get('checked_user_id'), $ip, 'COMMENT_VOTE', 'SUCCESS_DOWN', $id, $cid);
+					$logger->log_action($ip, 'COMMENT_VOTE', $f3->get('checked_user_id'), 'SUCCESS_DOWN', $id);
 				}
 			}
 			//Get the result and send to client

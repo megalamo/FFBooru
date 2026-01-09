@@ -253,7 +253,7 @@
 					$rand = mt_rand(1,$numrows);	
 					$result = $db->exec('SELECT id, rating, tags FROM '.$f3->get('post_table').' WHERE id = '.$rand.$dnp2.' LIMIT 1');
 					$id = $result[0]['id'];
-					if(strpos($blacklist,'rating:'.strtolower($row['rating']),0) === false || $override || $i > 20){
+					if(!str_contains($blacklist,'rating:'.strtolower($row['rating'])) || $override || $i > 20){
 						$valid_post_found = true;
 					}
 					if($i < 20 && $valid_post_found == true){
@@ -285,7 +285,7 @@
 			
 			//Make sure pconf was posted
 			if($_POST['pconf'] !="1"){
-				$logger->log_action($f3->get('checked_user_id'), $_SERVER['REMOTE_ADDR'], 'EDIT_POST', 'MISSING_PCONF');
+				$logger->log_action($_SERVER['REMOTE_ADDR'], 'EDIT_POST', $f3->get('checked_user_id'), 'MISSING_PCONF');
 				$template=new Template;
 			    echo $template->render('no_permission.html');
 				exit();
@@ -293,7 +293,7 @@
 			
 			//Check if user is banned
 			if($user->banned_ip($ip)){
-			    $logger->log_action($f3->get('checked_user_id'), $_SERVER['REMOTE_ADDR'], 'EDIT_POST', 'BANNED');
+			    $logger->log_action($_SERVER['REMOTE_ADDR'], 'EDIT_POST', $f3->get('checked_user_id'), 'BANNED');
 				$template=new Template;
 			    echo $template->render('no_permission.html');
 				exit();
@@ -301,7 +301,7 @@
 			
 			//Check if user is logged in
 			if(!$user->check_log()){
-			    $logger->log_action($f3->get('checked_user_id'), $_SERVER['REMOTE_ADDR'], 'EDIT_POST', 'NOT_LOGGED_IN');
+			    $logger->log_action($_SERVER['REMOTE_ADDR'], 'EDIT_POST', $f3->get('checked_user_id'), 'NOT_LOGGED_IN');
 				$template=new Template;
 			    echo $template->render('no_permission.html');
 				exit();
@@ -330,9 +330,9 @@
 			asort($ttags);
 			$tags = implode(" ",$ttags);
 			$tags = $misc->mb_trim(str_replace("  ","",$tags));
-			if(substr($tags,0,1) != " ")
+			if(!str_starts_with($tags, " "))
 				$tags = " $tags";
-			if(substr($tags,-1,1) != " ")
+			if(!str_ends_with($tags, " "))
 				$tags = "$tags ";
 			
 			//Get the current tags from database
@@ -387,16 +387,16 @@
 			//Tag array clean up for logs and tag list on post
 			$cleantags = array();
 			foreach($ttags as $tag){
-			    if(strpos($tag,'artist:') !== false || strpos($tag,'art:') !== false){
+			    if(str_contains($tag,'artist:') || str_contains($tag,'art:')){
 			        $tag = str_replace("artist:", "", $tag);
 			        $tag = str_replace("art:", "", $tag);
-			    }elseif(strpos($tag,'copyright:') !== false || strpos($tag,'copy:') !== false){
+			    }elseif(str_contains($tag,'copyright:') || str_contains($tag,'copy:')){
 			        $tag = str_replace("copyright:", "", $tag);
 			        $tag = str_replace("copy:", "", $tag);				        
-			    }elseif(strpos($tag,'character:') !== false || strpos($tag,'char:') !== false){
+			    }elseif(str_contains($tag,'character:') || str_contains($tag,'char:')){
 			        $tag = str_replace("character:", "", $tag);
 			        $tag = str_replace("char:", "", $tag);				        
-			    }elseif(strpos($tag,'species:') !== false || strpos($tag,'spec:') !== false){
+			    }elseif(str_contains($tag,'species:') || str_contains($tag,'spec:')){
 			        $tag = str_replace("species:", "", $tag);
 			        $tag = str_replace("spec:", "", $tag);				        
 			    }
@@ -430,7 +430,7 @@
 			    $parent = 0;
 			}
 			$update2 = $db->exec('UPDATE '.$f3->get('post_table').' SET title = ?, description = ?, tags = ?, rating = ?, source = ?, parent = ? WHERE id = ?',array(1=>$title,2=>$description,3=>$cleantaglist,4=>$rating,5=>$source,6=>$parent,7=>$id));
-			$logger->log_action($user_id, $ip, 'EDIT_POST', 'SUCCESS', $id);
+			$logger->log_action($ip, 'EDIT_POST', $user_id, 'SUCCESS', $id);
 
 			//Check if webhook array is defined for any tags
 			if(count($f3->get('webhooks.tags')) !== 0){
@@ -474,7 +474,7 @@
 			
 			//Check if user is banned
 			if($user->banned_ip($ip)){
-			    $logger->log_action($f3->get('checked_user_id'), $_SERVER['REMOTE_ADDR'], 'NOTE_SAVE', 'BANNED');
+			    $logger->log_action($_SERVER['REMOTE_ADDR'], 'NOTE_SAVE', $f3->get('checked_user_id'), 'BANNED');
 				$template=new Template;
 			    echo $template->render('no_permission.html');
 				exit();
@@ -482,7 +482,7 @@
 			
 			//Check if user is logged in and has access to alter notes
 			if(!$user->check_log() || !$user->gotpermission('alter_notes')){
-			    $logger->log_action($f3->get('checked_user_id'), $_SERVER['REMOTE_ADDR'], 'NOTE_SAVE', 'NO_ACCESS');
+			    $logger->log_action($_SERVER['REMOTE_ADDR'], 'NOTE_SAVE', $f3->get('checked_user_id'), 'NO_ACCESS');
 				$template=new Template;
 			    echo $template->render('no_permission.html');
 				exit();
@@ -522,7 +522,7 @@
 					$insert = $db->exec('INSERT INTO '.$f3->get('note_history_table').' (x, y, width, height, angle, body, created_at, updated_at, ip, user_id, version, post_id, note_id) VALUES(?, ?, ?, ?, ?, ?, ?, NOW(), ?, ?, ?, ?, ?)',array(1=>$x,2=>$y,3=>$width,4=>$height,5=>$angle,6=>$body,7=>$noteinfo[0]['created_at'],8=>$ip,9=>$f3->get('checked_user_id'),10=>($noteinfo[0]['version']+1),11=>$post_id,12=>$noteinfo[0]['id']));
 			        //Update note
 					$update = $db->exec('UPDATE '.$f3->get('note_table').' SET x = ?, y = ?, width = ?, height = ?, angle = ?, body = ?, updated_at=NOW(), user_id = ?, ip = ?, version=version + 1 WHERE post_id = ? AND id = ?',array(1=>$x,2=>$y,3=>$width,4=>$height,5=>$angle,6=>$body,7=>$f3->get('checked_user_id'),8=>$ip,9=>$post_id,10=>$id));
-					$logger->log_action($f3->get('checked_user_id'), $_SERVER['REMOTE_ADDR'], 'NOTE_SAVE', 'SUCCESS_EDIT', $id);
+					$logger->log_action($_SERVER['REMOTE_ADDR'], 'NOTE_SAVE', $f3->get('checked_user_id'), 'SUCCESS_EDIT', $id);
 				}else{
 					//Note does not exist, so it is being added
 					//Insert note
@@ -531,7 +531,7 @@
 			        $lastid = $db->lastInsertId();
 					//Insert note history
 					$noteinfo = $db->exec('INSERT INTO '.$f3->get('note_history_table').' (x, y, width, height, angle, body, created_at, updated_at, ip, user_id, version, post_id, note_id) VALUES(?, ?, ?, ?, ?, ?, NOW(), NOW(), ?, ?, \'1\', ?, ?)',array(1=>$x,2=>$y,3=>$width,4=>$height,5=>$angle,6=>$body,7=>$ip,8=>$f3->get('checked_user_id'),9=>$post_id,10=>$lastid));
-			        $logger->log_action($f3->get('checked_user_id'), $_SERVER['REMOTE_ADDR'], 'NOTE_SAVE', 'SUCCESS_ADD', $lastid);
+			        $logger->log_action($_SERVER['REMOTE_ADDR'], 'NOTE_SAVE', $f3->get('checked_user_id'), 'SUCCESS_ADD', $lastid);
 			        //Send data back for javascript
 			        print $lastid.":".$id;
 				}
@@ -547,7 +547,7 @@
 			
 			//Check if user is logged in and can delete posts
 			if(!$user->check_log() || !$user->gotpermission('delete_posts')){
-			    $logger->log_action($f3->get('checked_user_id'), $_SERVER['REMOTE_ADDR'], 'REMOVE', 'NO_ACCESS');
+			    $logger->log_action($_SERVER['REMOTE_ADDR'], 'REMOVE', $f3->get('checked_user_id'), 'NO_ACCESS');
 				$template=new Template;
 			    echo $template->render('no_permission.html');
 				exit();
@@ -584,7 +584,7 @@
 			            $update2 = $db->exec('UPDATE '.$f3->get('post_table').' SET status = ? WHERE id = ?',array(1=>$setstatus,2=>$_POST['id']));
 			
 			            //Success, redirect back to post
-			            $logger->log_action($f3->get('checked_user_id'), $ip, 'SOFTDELETE_POST', 'SUCCESS', $_POST['id']);                
+			            $logger->log_action($ip, 'SOFTDELETE_POST', $f3->get('checked_user_id'), 'SUCCESS', $_POST['id']);                
 			            $f3->reroute('/post/view/'.$_POST['id']);
 			        }else{
 			            //Post does not have flag reason, insert
@@ -596,7 +596,7 @@
 			            $update = $db->exec('UPDATE '.$f3->get('post_table').' SET status = ? WHERE id = ?',array(1=>$setstatus,2=>$_POST['id']));
 			
 			            //Success, redirect back to post
-			            $logger->log_action($f3->get('checked_user_id'), $ip, 'SOFTDELETE_POST', 'SUCCESS', $_POST['id']);                              
+			            $logger->log_action($ip, 'SOFTDELETE_POST', $f3->get('checked_user_id'), 'SUCCESS', $_POST['id']);                              
 			            $f3->reroute('/post/view/'.$_POST['id']);
 			        }
 				}else{
@@ -615,7 +615,7 @@
 			
 			//Check if user is banned
 			if($user->banned_ip($ip)){
-			    $logger->log_action($f3->get('checked_user_id'), $_SERVER['REMOTE_ADDR'], 'EDIT_POOL', 'BANNED');
+			    $logger->log_action($_SERVER['REMOTE_ADDR'], 'EDIT_POOL', $f3->get('checked_user_id'), 'BANNED');
 				$template=new Template;
 			    echo $template->render('no_permission.html');
 				exit();
@@ -623,7 +623,7 @@
 			
 			//Check if user is logged in and can delete posts
 			if(!$user->check_log() || !$user->gotpermission('delete_posts')){
-			    $logger->log_action($f3->get('checked_user_id'), $_SERVER['REMOTE_ADDR'], 'EDIT_POOL', 'NOT_LOGGED_IN');
+			    $logger->log_action($_SERVER['REMOTE_ADDR'], 'EDIT_POOL', $f3->get('checked_user_id'), 'NOT_LOGGED_IN');
 				$template=new Template;
 			    echo $template->render('no_permission.html');
 				exit();
@@ -662,7 +662,7 @@
 			            $update = $db->exec('UPDATE '.$f3->get('post_table').' SET status = ? WHERE id = ?',array(1=>$setstatus,2=>$_POST['id']));
 			
 			            //Success, we are out like trout
-			            $logger->log_action($f3->get('checked_user_id'), $ip, 'SOFTRESTORE_POST', 'SUCCESS', $_POST['id']);
+			            $logger->log_action($ip, 'SOFTRESTORE_POST', $f3->get('checked_user_id'), 'SUCCESS', $_POST['id']);
 			            $f3->reroute('/post/view/'.$id);
 			        }else{
 			            //Post does not have flag reason, update flag reason
@@ -670,7 +670,7 @@
 			            $update = $db->exec('UPDATE '.$f3->get('post_table').' SET status = ? WHERE id = ?',array(1=>$setstatus,2=>$_POST['id']));
 			            
 			            //Success, we are out like trout
-			            $logger->log_action($f3->get('checked_user_id'), $ip, 'SOFTRESTORE_POST', 'SUCCESS', $_POST['id']);
+			            $logger->log_action($ip, 'SOFTRESTORE_POST', $f3->get('checked_user_id'), 'SUCCESS', $_POST['id']);
 			            $f3->reroute('/post/view/'.$id);
 			        }
 				}else{
@@ -689,7 +689,7 @@
 			
 			//Check if user is banned
 			if($user->banned_ip($ip)){
-			    $logger->log_action($f3->get('checked_user_id'), $_SERVER['REMOTE_ADDR'], 'ADD_TO_POOL', 'BANNED');
+			    $logger->log_action($_SERVER['REMOTE_ADDR'], 'ADD_TO_POOL', $f3->get('checked_user_id'), 'BANNED');
 				$template=new Template;
 			    echo $template->render('no_permission.html');
 				exit();
@@ -697,7 +697,7 @@
 			
 			//Check if user is logged in and can edit posts
 			if(!$user->check_log() || !$user->gotpermission('edit_posts')){
-			    $logger->log_action($f3->get('checked_user_id'), $_SERVER['REMOTE_ADDR'], 'ADD_TO_POOL', 'NOT_LOGGED_IN');
+			    $logger->log_action($_SERVER['REMOTE_ADDR'], 'ADD_TO_POOL', $f3->get('checked_user_id'), 'NOT_LOGGED_IN');
 				$template=new Template;
 			    echo $template->render('no_permission.html');
 				exit();
@@ -734,9 +734,9 @@
 				            //Add post to pool
 				            $insert = $db->exec('INSERT INTO '.$f3->get('pool_post_table').' (sequence, pool_id, post_id) VALUES (?, ?, ?)',array(1=>$nextseq,2=>$_POST['poolid'],3=>$_POST['postid']));
 				            $update = $db->exec('UPDATE '.$f3->get('pool_table').' SET post_count = post_count + 1 WHERE id = ?',array(1=>$_POST['poolid']));
-				            $logger->log_action($f3->get('checked_user_id'), $_SERVER['REMOTE_ADDR'], 'ADD_TO_POOL', 'SUCCESS', $_POST['poolid']);
+				            $logger->log_action($_SERVER['REMOTE_ADDR'], 'ADD_TO_POOL', $f3->get('checked_user_id'), 'SUCCESS', $_POST['poolid']);
 			            }else{
-			            	$logger->log_action($f3->get('checked_user_id'), $_SERVER['REMOTE_ADDR'], 'ADD_TO_POOL', 'POST_IN_POOL', $_POST['poolid']);
+			            	$logger->log_action($_SERVER['REMOTE_ADDR'], 'ADD_TO_POOL', $f3->get('checked_user_id'), 'POST_IN_POOL', $_POST['poolid']);
 			            }
 			        }
 			    }
@@ -757,7 +757,7 @@
 			
 			//Check if user is logged in and has access
 			if(!$user->check_log() || !$user->gotpermission('approve_posts')){
-			    $logger->log_action($f3->get('checked_user_id'), $_SERVER['REMOTE_ADDR'], 'POST_APPROVE', 'NO_ACCESS');
+			    $logger->log_action($_SERVER['REMOTE_ADDR'], 'POST_APPROVE', $f3->get('checked_user_id'), 'NO_ACCESS');
 				$template=new Template;
 			    echo $template->render('no_permission.html');
 				exit();
@@ -783,7 +783,7 @@
 			        $setstatus = "active";
 			        $update = $db->exec('UPDATE '.$f3->get('post_table').' SET status = ? WHERE id = ?',array(1=>$setstatus,2=>$_POST['id']));
 			        
-			        $logger->log_action($f3->get('checked_user_id'), $ip, 'POST_APPROVE', 'SUCCESS', $_POST['id']);
+			        $logger->log_action($ip, 'POST_APPROVE', $f3->get('checked_user_id'), 'SUCCESS', $_POST['id']);
 			        $f3->reroute('/post/view/'.$id);
 				}else{
 			        $f3->reroute('/post/view/'.$id);
@@ -800,7 +800,7 @@
 			
 			//Check if user is logged in and has access to the admin panel
 			if(!$user->check_log() || !$user->gotpermission('admin_panel')){
-			    $logger->log_action($f3->get('checked_user_id'), $_SERVER['REMOTE_ADDR'], 'CHANGE_POST_STATUS', 'NOT_LOGGED_IN');
+			    $logger->log_action($_SERVER['REMOTE_ADDR'], 'CHANGE_POST_STATUS', $f3->get('checked_user_id'), 'NOT_LOGGED_IN');
 				$template=new Template;
 			    echo $template->render('no_permission.html');
 				exit();
@@ -819,7 +819,7 @@
 			    		//Check if post is valid
 			    		if(count($postinfo) == "1"){
 			                $update = $db->exec('UPDATE '.$f3->get('post_table').' SET status=\'active\' WHERE id = ?',array(1=>$id));
-			                $logger->log_action($f3->get('checked_user_id'), $ip, 'CHANGE_POST_STATUS', 'SUCCESS_ACTIVE', $f3->get('PARAMS.id'));
+			                $logger->log_action($ip, 'CHANGE_POST_STATUS', $f3->get('checked_user_id'), 'SUCCESS_ACTIVE', $f3->get('PARAMS.id'));
 			            }
 			            //Send to post
 			            $f3->reroute('/post/view/'.$id);
@@ -829,7 +829,7 @@
 			    		//Check if post is valid
 			    		if(count($postinfo) == "1"){
 			                $update = $db->exec('UPDATE '.$f3->get('post_table').' SET status=\'deleted\' WHERE id = ?',array(1=>$id));
-			                $logger->log_action($f3->get('checked_user_id'), $ip, 'CHANGE_POST_STATUS', 'SUCCESS_DELETED', $f3->get('PARAMS.id'));
+			                $logger->log_action($ip, 'CHANGE_POST_STATUS', $f3->get('checked_user_id'), 'SUCCESS_DELETED', $f3->get('PARAMS.id'));
 			            }
 			            //Send to post
 			            $f3->reroute('/post/view/'.$id);
@@ -839,7 +839,7 @@
 			    		//Check if post is valid
 			    		if(count($postinfo) == "1"){
 			                $update = $db->exec('UPDATE '.$f3->get('post_table').' SET status=\'pending\' WHERE id = ?',array(1=>$id));
-			                $logger->log_action($f3->get('checked_user_id'), $ip, 'CHANGE_POST_STATUS', 'SUCCESS_PENDING', $f3->get('PARAMS.id'));
+			                $logger->log_action($ip, 'CHANGE_POST_STATUS', $f3->get('checked_user_id'), 'SUCCESS_PENDING', $f3->get('PARAMS.id'));
 			            }
 			            //Send to post
 			            $f3->reroute('/post/view/'.$id);
@@ -857,7 +857,7 @@
 			
 			//Check if user is logged in and has access to the admin panel
 			if(!$user->check_log() || !$user->gotpermission('admin_panel')){
-			    $logger->log_action($f3->get('checked_user_id'), $_SERVER['REMOTE_ADDR'], 'CHANGE_DNP', 'NOT_LOGGED_IN');
+			    $logger->log_action($_SERVER['REMOTE_ADDR'], 'CHANGE_DNP', $f3->get('checked_user_id'), 'NOT_LOGGED_IN');
 				$template=new Template;
 			    echo $template->render('no_permission.html');
 				exit();
@@ -878,7 +878,7 @@
 						//Check if post is valid
 			    		if(count($postinfo) == "1"){
 			                $update = $db->exec('UPDATE '.$f3->get('post_table').' SET dnp = ? WHERE id = ?',array(1=>$dnpid,2=>$id));
-			                $logger->log_action($f3->get('checked_user_id'), $ip, 'CHANGE_DNP', 'SUCCESS', $id);
+			                $logger->log_action($ip, 'CHANGE_DNP', $f3->get('checked_user_id'), 'SUCCESS', $id);
 			            }
 			            //Send to post
 			            $f3->reroute('/post/view/'.$id);
@@ -899,7 +899,7 @@
 			
 			//Check if user is banned
 			if($user->banned_ip($ip)){
-			    $logger->log_action($f3->get('checked_user_id'), $_SERVER['REMOTE_ADDR'], 'POOL_EDITOR', 'BANNED');
+			    $logger->log_action($_SERVER['REMOTE_ADDR'], 'POOL_EDITOR', $f3->get('checked_user_id'), 'BANNED');
 				$template=new Template;
 			    echo $template->render('no_permission.html');
 				exit();
@@ -907,7 +907,7 @@
 			
 			//Check if user is logged in
 			if(!$user->check_log()){
-			    $logger->log_action($f3->get('checked_user_id'), $_SERVER['REMOTE_ADDR'], 'POOL_EDITOR', 'NOT_LOGGED_IN');
+			    $logger->log_action($_SERVER['REMOTE_ADDR'], 'POOL_EDITOR', $f3->get('checked_user_id'), 'NOT_LOGGED_IN');
 				$template=new Template;
 			    echo $template->render('no_permission.html');
 				exit();
@@ -917,7 +917,7 @@
 			if ($post->validate_pool($_POST['poolid'])){
 			   $poolid = $_POST['poolid'];
 			}else{
-			   $logger->log_action($f3->get('checked_user_id'), $ip, 'POOL_EDITOR', 'INVALID_ID', $_POST['poolid']);
+			   $logger->log_action($ip, 'POOL_EDITOR', $f3->get('checked_user_id'), 'INVALID_ID', $_POST['poolid']);
 			   echo "ERROR: INVALID ID OR NO ACCESS TO EDIT POOL";
 			   exit();
 			}
@@ -940,11 +940,11 @@
 			    foreach($posts as $postnum => $postid){
 			        $update = $db->exec('UPDATE '.$f3->get('pool_post_table').' SET sequence = ? WHERE pool_id = ? AND post_id = ?',array(1=>$postnum,2=>$poolid,3=>$postid));
 			        if (!$update) {
-			            $logger->log_action($f3->get('checked_user_id'), $ip, 'EDIT_POOL', 'DB_ERROR', $_POST['poolid']);
+			            $logger->log_action($ip, 'EDIT_POOL', $f3->get('checked_user_id'), 'DB_ERROR', $_POST['poolid']);
 			        }
 			    }
 			    //Finish dat shit
-			    $logger->log_action($f3->get('checked_user_id'), $ip, 'EDIT_POOL_ORDER', 'SUCCESS', $_POST['poolid']);
+			    $logger->log_action($ip, 'EDIT_POOL_ORDER', $f3->get('checked_user_id'), 'SUCCESS', $_POST['poolid']);
 				echo "OK";
 			//Delete mode
 			}elseif($f3->get('PARAMS.mode') == "delete"){
@@ -962,7 +962,7 @@
 			    if (count($posts) !== 0){
 				    foreach($posts as $post){
 				    	 $delete = $db->exec('DELETE FROM '.$f3->get('pool_post_table').' WHERE pool_id = ? AND post_id = ?',array(1=>$poolid,2=>$postid));
-				    	 $logger->log_action($f3->get('checked_user_id'), $ip, 'DELETE_FROM_POOL', 'SUCCESS - POOL: '.$poolid, $postid);
+				    	 $logger->log_action($ip, 'DELETE_FROM_POOL', $f3->get('checked_user_id'), 'SUCCESS - POOL: '.$poolid, $postid);
 				    }
 			    }
 			    //Get all posts in pool
@@ -975,7 +975,7 @@
 			    }
 			    //Finish dat shit
 			    $db->exec('UPDATE '.$f3->get('pool_table').' SET post_count = ? WHERE id = ?',array(1=>$totalposts,2=>$poolid));
-			    $logger->log_action($f3->get('checked_user_id'), $ip, 'DELETE_FROM_POOL', 'SUCCESS', $_POST['poolid']);
+			    $logger->log_action($ip, 'DELETE_FROM_POOL', $f3->get('checked_user_id'), 'SUCCESS', $_POST['poolid']);
 				echo "OK";
 			}
 		}

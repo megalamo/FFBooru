@@ -4,8 +4,8 @@
 		$user = new user();
 		if(!$user->check_log())
 		{
-			setcookie("user_id","",time()-60*60*24*365);
-			setcookie("pass_hash","",time()-60*60*24*365);
+			setcookie("user_id","",['expires' => time()-60*60*24*365]);
+			setcookie("pass_hash","",['expires' => time()-60*60*24*365]);
 		}
 	}
 ?>

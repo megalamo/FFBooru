@@ -86,7 +86,7 @@
 				$ttags[] = "tagme";
 			foreach($ttags as $current)
 			{
-				if(strpos($current,'parent:') !== false)
+				if(str_contains($current,'parent:'))
 				{
 					$current = '';
 					$parent = str_replace("parent:","",$current);

@@ -55,10 +55,8 @@ class StaticMap {
 		return ($req=$web->request(
 			self::URL_Static.'?'.array_reduce(
 				$this->query,
-				function($out,$item) {
-					return ($out.=($out?'&':'').
-						urlencode($item[0]).'='.urlencode($item[1]));
-				}
+				fn($out, $item) => $out.=($out?'&':'').
+						urlencode($item[0]).'='.urlencode($item[1])
 			))) && $req['body']?$req['body']:FALSE;
 	}
 

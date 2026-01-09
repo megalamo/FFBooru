@@ -61,13 +61,11 @@ class Template extends Preview {
 			preg_match_all('/(\w+)\h*=\h*(.+?)(?=,|$)/',
 				$attrib['with'],$pairs,PREG_SET_ORDER)?
 					'array('.implode(',',
-						array_map(function($pair) {
-							return '\''.$pair[1].'\'=>'.
+						array_map(fn($pair) => '\''.$pair[1].'\'=>'.
 								(preg_match('/^\'.*\'$/',$pair[2]) ||
 									preg_match('/\$/',$pair[2])?
 									$pair[2]:
-									\Base::instance()->stringify($pair[2]));
-						},$pairs)).')+get_defined_vars()':
+									\Base::instance()->stringify($pair[2])),$pairs)).')+get_defined_vars()':
 					'get_defined_vars()';
 		return
 			'<?php '.(isset($attrib['if'])?
@@ -151,7 +149,7 @@ class Template extends Preview {
 				$false=array($pos,$block);
 		if (isset($true,$false) && $true[0]>$false[0])
 			// Reverse <true> and <false> blocks
-			list($node[$true[0]],$node[$false[0]])=array($false[1],$true[1]);
+			[$node[$true[0]], $node[$false[0]]]=array($false[1],$true[1]);
 		return
 			'<?php if ('.$this->token($attrib['if']).'): ?>'.
 				$this->build($node).

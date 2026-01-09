@@ -6,7 +6,7 @@ $f3->set('user',$user);
 
 //Check if user is an admin
 if(!$user->gotpermission('is_admin')){
-    $logger->log_action($f3->get('checked_user_id'), $_SERVER['REMOTE_ADDR'], 'ADMIN_EDIT_GROUP', 'NO_ACCESS');
+    $logger->log_action($_SERVER['REMOTE_ADDR'], 'ADMIN_EDIT_GROUP', $f3->get('checked_user_id'), 'NO_ACCESS');
 	$template=new Template;
     echo $template->render('no_permission.html');
 	exit();
@@ -18,7 +18,7 @@ if($f3->get('PARAMS.delete') !== "" && is_numeric($f3->get('PARAMS.delete'))){
 	$del_id = $f3->get('PARAMS.delete');
 	//Delete group id
 	$delete = $db->exec('DELETE FROM '.$f3->get('group_table').' WHERE id = ?',array(1=>$del_id));
-	$logger->log_action($f3->get('checked_user_id'), $_SERVER['REMOTE_ADDR'], 'ADMIN_DELETE_GROUP', 'SUCCESS', $del_id);
+	$logger->log_action($_SERVER['REMOTE_ADDR'], 'ADMIN_DELETE_GROUP', $f3->get('checked_user_id'), 'SUCCESS', $del_id);
 	$error = "Group Deleted.";
 }
 
@@ -52,11 +52,11 @@ if(isset($_POST['check']) && $_POST['check'] == 1){
 	if($update1){
 		//Success
 		$error = "Permissions edited.";
-		$logger->log_action($f3->get('checked_user_id'), $_SERVER['REMOTE_ADDR'], 'ADMIN_EDIT_GROUP', 'SUCCESS', $_POST['group']);
+		$logger->log_action($_SERVER['REMOTE_ADDR'], 'ADMIN_EDIT_GROUP', $f3->get('checked_user_id'), 'SUCCESS', $_POST['group']);
 	}else{
 		//Fail
 		$error = "Failed to edit permissions.";
-		$logger->log_action($f3->get('checked_user_id'), $_SERVER['REMOTE_ADDR'], 'ADMIN_EDIT_GROUP', 'DB_ERROR', $_POST['group']);
+		$logger->log_action($_SERVER['REMOTE_ADDR'], 'ADMIN_EDIT_GROUP', $f3->get('checked_user_id'), 'DB_ERROR', $_POST['group']);
 	}
 }
 

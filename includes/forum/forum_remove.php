@@ -1,4 +1,4 @@
- <?php
+<?php
 //Load required classes
 $user = new user();
 $logger = new logger();
@@ -6,7 +6,7 @@ $ip = $_SERVER['REMOTE_ADDR'];
 
 //Check if user is banned
 if($user->banned_ip($ip)){
-    $logger->log_action($f3->get('checked_user_id'), $_SERVER['REMOTE_ADDR'], 'FORUM_REMOVE', 'BANNED');
+    $logger->log_action($_SERVER['REMOTE_ADDR'], 'FORUM_REMOVE', $f3->get('checked_user_id'), 'BANNED');
 	$template=new Template;
     echo $template->render('no_permission.html');
 	exit();
@@ -14,7 +14,7 @@ if($user->banned_ip($ip)){
 
 //Check if user is logged in
 if(!$user->check_log()){
-    $logger->log_action($f3->get('checked_user_id'), $_SERVER['REMOTE_ADDR'], 'FORUM_REMOVE', 'NOT_LOGGED_IN');
+    $logger->log_action($_SERVER['REMOTE_ADDR'], 'FORUM_REMOVE', $f3->get('checked_user_id'), 'NOT_LOGGED_IN');
 	$template=new Template;
     echo $template->render('no_permission.html');
 	exit();
@@ -39,11 +39,11 @@ if($f3->get('PARAMS.type') == "post" && $f3->get('PARAMS.page') !== "" && $f3->g
 			$delete = $db->exec('DELETE FROM '.$f3->get('forum_post_table').' WHERE id = ?',array(1=>$cid));
 		}
 		//Done, redirect the user back to the thread
-		$logger->log_action($f3->get('checked_user_id'), $_SERVER['REMOTE_ADDR'], 'FORUM_DELETE_POST', 'SUCCESS', $pid);
+		$logger->log_action($_SERVER['REMOTE_ADDR'], 'FORUM_DELETE_POST', $f3->get('checked_user_id'), 'SUCCESS', $pid);
 		$f3->reroute('/forum/view/'.$pid);
 	}else{
 		//User does not have access to delete post, redirect
-		$logger->log_action($f3->get('checked_user_id'), $_SERVER['REMOTE_ADDR'], 'FORUM_DELETE_POST', 'NO_ACCESS', $pid);
+		$logger->log_action($_SERVER['REMOTE_ADDR'], 'FORUM_DELETE_POST', $f3->get('checked_user_id'), 'NO_ACCESS', $pid);
 		$f3->reroute('/forum/view/'.$pid);
 	}
 }else if($f3->get('PARAMS.type') == "topic" && $f3->get('PARAMS.page') !== "" && $f3->get('PARAMS.id') !== ""){
@@ -56,11 +56,11 @@ if($f3->get('PARAMS.type') == "post" && $f3->get('PARAMS.page') !== "" && $f3->g
 		$delete1 = $db->exec('DELETE FROM '.$f3->get('forum_post_table').' WHERE topic_id = ?',array(1=>$fid));
 		$delete2 = $db->exec('DELETE FROM '.$f3->get('forum_topic_table').' WHERE id = ?',array(1=>$fid));
 		//Done, redirect the user to the page their topic is on
-		$logger->log_action($f3->get('checked_user_id'), $_SERVER['REMOTE_ADDR'], 'FORUM_DELETE_TOPIC', 'SUCCESS', $fid);
+		$logger->log_action($_SERVER['REMOTE_ADDR'], 'FORUM_DELETE_TOPIC', $f3->get('checked_user_id'), 'SUCCESS', $fid);
 		$f3->reroute('/forum/list/'.$pid);
 	}else{
 		//User does not have access to delete, redirect
-		$logger->log_action($f3->get('checked_user_id'), $_SERVER['REMOTE_ADDR'], 'FORUM_DELETE_TOPIC', 'NO_ACCESS', $fid);
+		$logger->log_action($_SERVER['REMOTE_ADDR'], 'FORUM_DELETE_TOPIC', $f3->get('checked_user_id'), 'NO_ACCESS', $fid);
 		$f3->reroute('/forum/list/'.$pid);	
 	}
 }else{

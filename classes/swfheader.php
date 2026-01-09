@@ -40,7 +40,7 @@ class swfheader {
 	// swfheader($debug) : 	Constructor, basically does nothing but initilize 
 	//											debug and data fields
 	//--------------------------------------------------------------------------- 
-	function swfheader($debug = false) {
+	function __construct($debug = false) {
 		$this->debug = $debug ;
 		$this->init() ;
 	  }
@@ -77,7 +77,7 @@ class swfheader {
 				$this->valid =  0 ;
 			} else {
 				// Compression
-				if (substr($this->magic,0,1)=="C") $this->compressed = true ;
+				if (str_starts_with($this->magic, "C")) $this->compressed = true ;
 				else $this->compressed = false ;
 				if ($this->debug) echo "DEBUG: Read MAGIC signature: " . $this->magic . "<br>" ;
 				// Version

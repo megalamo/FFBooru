@@ -1,6 +1,6 @@
 <?php
 $logger = new logger();
-$logger->log_action($f3->get('checked_user_id'), $_SERVER['REMOTE_ADDR'], 'FORUM_LIST', $f3->get('PARAMS.page'));
+$logger->log_action($_SERVER['REMOTE_ADDR'], 'FORUM_LIST', $f3->get('checked_user_id'), $f3->get('PARAMS.page'));
 
 //Number of topics/page
 $limit = 40;

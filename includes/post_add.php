@@ -34,7 +34,7 @@
 		$uploaded_image = false;
 		$parent = '';
 		$error = '';
-		if(empty($_FILES['upload']) && isset($_POST['source']) && $_POST['source'] != "" && substr($_POST['source'],0,4) == "http" || $_FILES['upload']['error'] != 0 && isset($_POST['source']) && $_POST['source'] != "" && substr($_POST['source'],0,4) == "http")
+		if(empty($_FILES['upload']) && isset($_POST['source']) && $_POST['source'] != "" && str_starts_with($_POST['source'], "http") || $_FILES['upload']['error'] != 0 && isset($_POST['source']) && $_POST['source'] != "" && str_starts_with($_POST['source'], "http"))
 		{
 			if($debug)
 				print "getremoteimage()...";
@@ -89,11 +89,11 @@
 			$tag_count = count($ttags);		
 			if($tag_count == 0)
 				$ttags[] = "tagme";
-			if($tag_count < 5 && strpos(implode(" ",$ttags),"tagme") === false)
+			if($tag_count < 5 && !str_contains(implode(" ",$ttags),"tagme"))
 				$ttags[] = "tagme";
 			foreach($ttags as $current)
 			{
-				if(strpos($current,'parent:') !== false)
+				if(str_contains($current,'parent:'))
 				{
 					$current = '';
 					$parent = str_replace("parent:","",$current);
@@ -135,9 +135,9 @@
 			asort($ttags);
 			$tags = implode(" ",$ttags);
 			$tags = mb_trim(str_replace("  ","",$tags));			
-			if(substr($tags,0,1) != " ")
+			if(!str_starts_with($tags, " "))
 				$tags = " $tags";
-			if(substr($tags,-1,1) != " ")
+			if(!str_ends_with($tags, " "))
 				$tags = "$tags ";
 			$rating = $db->real_escape_string($_POST['rating']);
 			if($rating == "e")

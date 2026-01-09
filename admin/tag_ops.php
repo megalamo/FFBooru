@@ -216,7 +216,7 @@
 				$db->query($query);
 				$qt = $db->affected_rows;
 				print "\"$cur_tag\" tag added to ".$qt." posts<br/>";
-				$tclass->addindextag($cur_tag, $qt);
+				$tclass->addindextag($cur_tag);
 			}
 		}
 		print "<a href=\"index.php?page=tag_ops\">Go Back</a>";
@@ -260,7 +260,7 @@
 				$db->query($query);
 				$qt = $db->affected_rows;
 				print "\"$cur_tag\" tag removed from ".$qt." posts<br/>";
-				$tclass->deleteindextag($cur_tag, $qt);
+				$tclass->deleteindextag($cur_tag);
 			}
 		}
 		print "<a href=\"index.php?page=tag_ops\">Go Back</a>";
@@ -269,7 +269,7 @@
 	{
 		$losetag = $db->real_escape_string(htmlentities($_GET['replace_tags'], ENT_QUOTES, 'UTF-8'));
 		$newtag = $db->real_escape_string(htmlentities($_GET['new_tags'], ENT_QUOTES, 'UTF-8'));
-		if(strstr($losetag, " ") != FALSE || strstr($newtag, " ") != FALSE)
+		if(str_contains($losetag, " ") || str_contains($newtag, " "))
 		{
 			echo "<strong>When replacing one tag with another, neither of the input fields can contain a space</strong><br/>";
 			exit;
@@ -311,8 +311,8 @@
 			$db->query($query);
 			$qt = $db->affected_rows;
 			print "\"$losetag\" tag replaced with \"$newtag\" in $qt posts<br/><a href=\"index.php?page=tag_ops\">Go Back</a>";
-			$tclass->deleteindextag($losetag, $qt);
-			$tclass->addindextag($newtag, $qt);
+			$tclass->deleteindextag($losetag);
+			$tclass->addindextag($newtag);
 		}
 	}
 	else

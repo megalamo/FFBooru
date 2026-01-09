@@ -83,7 +83,7 @@ class misc{
     }
 
 	function linebreaks($text){
-		if(strpos($text,"\r\n") !== false){
+		if(str_contains($text,"\r\n")){
 			return str_replace("\r\n","<br />",$text);
 		}
 		return $text;
@@ -109,27 +109,27 @@ class misc{
 	}
 
 	function windows_filename_fix($new_tag_cache){
-		if(strpos($new_tag_cache,";") !== false)
+		if(str_contains($new_tag_cache,";"))
 			$new_tag_cache = str_replace(";","&#059;",$new_tag_cache);
-		if(strpos($new_tag_cache,".") !== false)
+		if(str_contains($new_tag_cache,"."))
 			$new_tag_cache = str_replace(".","&#046;",$new_tag_cache);
-		if(strpos($new_tag_cache,"*") !== false)
+		if(str_contains($new_tag_cache,"*"))
 			$new_tag_cache = str_replace("*","&#042;",$new_tag_cache);
-		if(strpos($new_tag_cache,"|") !== false)
+		if(str_contains($new_tag_cache,"|"))
 			$new_tag_cache = str_replace("|","&#124;",$new_tag_cache);
-		if(strpos($new_tag_cache,"\\") !== false)
+		if(str_contains($new_tag_cache,"\\"))
 			$new_tag_cache = str_replace("\\","&#092;",$new_tag_cache);
-		if(strpos($new_tag_cache,"/") !== false)
+		if(str_contains($new_tag_cache,"/"))
 			$new_tag_cache = str_replace("/","&#047;",$new_tag_cache);
-		if(strpos($new_tag_cache,":") !== false)
+		if(str_contains($new_tag_cache,":"))
 			$new_tag_cache = str_replace(":","&#058;",$new_tag_cache);
-		if(strpos($new_tag_cache,'"') !== false)
+		if(str_contains($new_tag_cache,'"'))
 			$new_tag_cache = str_replace('"',"&quot;",$new_tag_cache);
-		if(strpos($new_tag_cache,"<") !== false)
+		if(str_contains($new_tag_cache,"<"))
 			$new_tag_cache = str_replace("<","&lt;",$new_tag_cache);
-		if(strpos($new_tag_cache,">") !== false)
+		if(str_contains($new_tag_cache,">"))
 			$new_tag_cache = str_replace(">","&gt;",$new_tag_cache);
-		if(strpos($new_tag_cache,"?") !== false)
+		if(str_contains($new_tag_cache,"?"))
 			$new_tag_cache = str_replace("?","&#063;",$new_tag_cache);
 		return $new_tag_cache;	
 	}
@@ -152,7 +152,7 @@ class misc{
 	}
 
 	function getRemoteFileSize($header){
-		if(strpos($header,"Content-Length:") === false){
+		if(!str_contains($header,"Content-Length:")){
 			return 0;
 		}
 		$count = preg_match($header,'/Content-Length:\s([0-9].+?)\s/',$matches);
@@ -308,7 +308,7 @@ class misc{
 		
 		//Check if user is banned
 		if($user->banned_ip($ip)){
-		    $logger->log_action($f3->get('checked_user_id'), $_SERVER['REMOTE_ADDR'], 'REPORT', 'BANNED');
+		    $logger->log_action($_SERVER['REMOTE_ADDR'], 'REPORT', $f3->get('checked_user_id'), 'BANNED');
 			$template=new Template;
 		    echo $template->render('no_permission.html');
 			exit();
@@ -316,7 +316,7 @@ class misc{
 		
 		//Check if user is logged in and anon report is enabled
 		if(!$user->check_log() && !$f3->get('anon_report')){
-		    $logger->log_action($f3->get('checked_user_id'), $_SERVER['REMOTE_ADDR'], 'REPORT', 'NOT_LOGGED_IN');
+		    $logger->log_action($_SERVER['REMOTE_ADDR'], 'REPORT', $f3->get('checked_user_id'), 'NOT_LOGGED_IN');
 			$template=new Template;
 		    echo $template->render('no_permission.html');
 			exit();
@@ -334,11 +334,11 @@ class misc{
 				//Check if update succeeded
 				if($update){
 					//Success
-					$logger->log_action($f3->get('checked_user_id'), $_SERVER['REMOTE_ADDR'], 'REPORT_COMMENT', 'SUCCESS', $rid);
+					$logger->log_action($_SERVER['REMOTE_ADDR'], 'REPORT_COMMENT', $f3->get('checked_user_id'), 'SUCCESS', $rid);
 					print "pass";
 				}else{
 					//Failed
-					$logger->log_action($f3->get('checked_user_id'), $_SERVER['REMOTE_ADDR'], 'REPORT_COMMENT', 'ERROR_DB', $rid);
+					$logger->log_action($_SERVER['REMOTE_ADDR'], 'REPORT_COMMENT', $f3->get('checked_user_id'), 'ERROR_DB', $rid);
 					print "fail";
 				}
 			}else if($type == "post"){
@@ -347,7 +347,7 @@ class misc{
 				//Check if reason is more than 0 characters
 				if(strlen($reason) > 0){
 					$insert = $db->exec('INSERT INTO '.$f3->get('flagged_post_table').' (created_at, post_id, reason, user_id, is_resolved) VALUES(NOW(), ?, ?, ?, \'0\')',array(1=>$rid,2=>$reason,3=>$f3->get('checked_user_id')));
-					$logger->log_action($f3->get('checked_user_id'), $_SERVER['REMOTE_ADDR'], 'REPORT_POST', 'SUCCESS', $rid);
+					$logger->log_action($_SERVER['REMOTE_ADDR'], 'REPORT_POST', $f3->get('checked_user_id'), 'SUCCESS', $rid);
 				}
 				//Success, reroute
 				$f3->reroute('/post/view/'.$rid);
@@ -368,7 +368,7 @@ class misc{
 		
 		//Check if user is logged in
 		if(!$user->check_log()){
-		    $logger->log_action($f3->get('checked_user_id'), $_SERVER['REMOTE_ADDR'], 'REMOVE', 'NO_ACCESS');
+		    $logger->log_action($_SERVER['REMOTE_ADDR'], 'REMOVE', $f3->get('checked_user_id'), 'NO_ACCESS');
 			$template=new Template;
 		    echo $template->render('no_permission.html');
 			exit();
@@ -381,7 +381,7 @@ class misc{
 			if($f3->get('PARAMS.type') == "note" && is_numeric($f3->get('PARAMS.altid')) && $f3->get('PARAMS.altid') != ""){
 				//Check if user has access to delete notes
 				if(!$user->gotpermission('alter_notes')){
-				    $logger->log_action($f3->get('checked_user_id'), $_SERVER['REMOTE_ADDR'], 'REMOVE_NOTE', 'NO_ACCESS');
+				    $logger->log_action($_SERVER['REMOTE_ADDR'], 'REMOVE_NOTE', $f3->get('checked_user_id'), 'NO_ACCESS');
 					exit();
 				}
 				//Store the note id
@@ -395,17 +395,17 @@ class misc{
 					$delete2 = $db->exec('DELETE FROM '.$f3->get('note_history_table').' WHERE post_id = ? AND note_id = ?',array(1=>$id,2=>$note_id));
 					//Return note id
 					print $note_id;
-					$logger->log_action($f3->get('checked_user_id'), $_SERVER['REMOTE_ADDR'], 'REMOVE_NOTE', 'SUCCESS', $note_id);
+					$logger->log_action($_SERVER['REMOTE_ADDR'], 'REMOVE_NOTE', $f3->get('checked_user_id'), 'SUCCESS', $note_id);
 				}
 			}else if($f3->get('PARAMS.type') == "post"){
 				//Call removeimage function and check if we got a good response
 				if($images->removeimage($id) == true){
 					//Success, redirect to post list
-					$logger->log_action($f3->get('checked_user_id'), $_SERVER['REMOTE_ADDR'], 'REMOVE_POST', 'SUCCESS', $id);
+					$logger->log_action($_SERVER['REMOTE_ADDR'], 'REMOVE_POST', $f3->get('checked_user_id'), 'SUCCESS', $id);
 					$f3->reroute('/post/all');
 				}else{
 					//Error, redirect to post list
-					$logger->log_action($f3->get('checked_user_id'), $_SERVER['REMOTE_ADDR'], 'REMOVE_POST', 'ERROR', $id);
+					$logger->log_action($_SERVER['REMOTE_ADDR'], 'REMOVE_POST', $f3->get('checked_user_id'), 'ERROR', $id);
 					$f3->reroute('/post/all');
 				}
 			}else if($f3->get('PARAMS.type') == "comment"){
@@ -423,11 +423,11 @@ class misc{
 						$delete2 = $db->exec('DELETE FROM '.$f3->get('comment_vote_table').' WHERE comment_id = ?',array(1=>$id));
 						//Update post count
 						$update = $db->exec('UPDATE '.$f3->get('post_count_table').' SET pcount = pcount - 1 WHERE access_key = \'comment_count\'');
-						$logger->log_action($f3->get('checked_user_id'), $_SERVER['REMOTE_ADDR'], 'REMOVE_COMMENT', 'SUCCESS', $id);
+						$logger->log_action($_SERVER['REMOTE_ADDR'], 'REMOVE_COMMENT', $f3->get('checked_user_id'), 'SUCCESS', $id);
 					}
 				}else{
 					//User does not have access
-					$logger->log_action($f3->get('checked_user_id'), $_SERVER['REMOTE_ADDR'], 'REMOVE_POST', 'NO_ACCESS', $id);
+					$logger->log_action($_SERVER['REMOTE_ADDR'], 'REMOVE_POST', $f3->get('checked_user_id'), 'NO_ACCESS', $id);
 				}
 				//Reroute to post view
 				$f3->reroute('/post/view/'.$post_id);

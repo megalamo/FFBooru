@@ -85,7 +85,7 @@
 			echo "<h5>".ucfirst(str_replace('_',' ',$cat));
 			if(count($tag_arr) > 1)
 			{
-				if(substr($cat, -1) == 's') echo "'";
+				if(str_ends_with($cat, 's')) echo "'";
 				else echo "s";
 			}
 			echo "</h5>";

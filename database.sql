@@ -272,7 +272,7 @@ CREATE TABLE `forum_posts` (
   `id` bigint(99) unsigned NOT NULL AUTO_INCREMENT,
   `title` text,
   `post` text NOT NULL,
-  `author` varchar(256) DEFAULT NULL,
+  `author` varchar(255) DEFAULT NULL,
   `creation_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `topic_id` bigint(20) unsigned NOT NULL,
   PRIMARY KEY (`id`),
@@ -299,7 +299,7 @@ DROP TABLE IF EXISTS `forum_topics`;
 CREATE TABLE `forum_topics` (
   `id` bigint(99) unsigned NOT NULL AUTO_INCREMENT,
   `topic` text,
-  `author` varchar(256) DEFAULT NULL,
+  `author` varchar(255) DEFAULT NULL,
   `last_updated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `creation_post` bigint(20) unsigned NOT NULL,
   `priority` int(99) unsigned DEFAULT '0',

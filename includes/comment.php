@@ -33,7 +33,7 @@
 				header("Location:index.php?page=post&s=view&id=$id");
 				exit;	
 			}
-			$comment->edit($id,$_POST['comment'],$user);
+			$comment->edit();
 			$cache = new cache();
 			$cache->destroy_page_cache("cache/".$id);
 			$cache->create_page_cache("cache/".$id);
@@ -61,7 +61,7 @@
 				$user_id = $row['id'];
 				$anon_id = $row['id'];
 			}
-			$comment->add($_POST['comment'],$user,$id,$ip,$user_id);
+			$comment->add();
 			$cache = new cache();
 			$cache->destroy_page_cache("cache/".$id);
 			$cache->create_page_cache("cache/".$id);
@@ -80,7 +80,7 @@
 			$cache = new cache();
 			@$cache->destroy_page_cache("cache/".$id);
 			@$cache->create_page_cache("cache/".$id);
-			$comment->vote($cid,$vote,$user,$id,$user_id);
+			$comment->vote();
 		}
 		else if(isset($_GET['s']) && $_GET['s'] === "view" && isset($_GET['cid']) && is_numeric($_GET['cid']))
 		{
@@ -133,7 +133,7 @@
 		$result->free_result();
 		$pages = round($numrows/$limit);
 		$current = ($page/$limit) + 1;
-		if ($pages < 1 || $pages == 0 || $pages == "")
+		if ($pages < 1 || $pages == 0 || $pages == 0.0)
 			$total = 1;
 		else
 			$total = $pages;

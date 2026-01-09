@@ -127,7 +127,7 @@
 				$video_data = $ffprobe->streams($file);
 				$video_format = $ffprobe->format($file);
 				//Check for valid container (webm or mp4)
-				if(strpos($video_format->get('format_name'),'webm') !== false || $video_format->get('tags')['major_brand'] == 'mp42'){
+				if(str_contains($video_format->get('format_name'),'webm') || $video_format->get('tags')['major_brand'] == 'mp42'){
 	    			//Save out data we are going to use
 	    			$video_info['codec_name'] = $video_data->videos()->first()->get('codec_name');
 	    			$video_info['codec_type'] = $video_data->videos()->first()->get('codec_type');
@@ -136,7 +136,7 @@
 				}else{
 				    return false;
 				}
-			}catch(Exception $e){
+			}catch(Exception){
 				//Error getting video data
 				return false;	
 			}
@@ -175,7 +175,7 @@
 				return false;
 			}
 			$iinfo = getimagesize("./tmp/".$fname.$ext);
-			if(substr($iinfo['mime'],0,5) != "image" || !$this->checksum("./tmp/".$fname.$ext))
+			if(!str_starts_with($iinfo['mime'], "image") || !$this->checksum("./tmp/".$fname.$ext))
 			{
 				unlink("./tmp/".$fname.$ext);
 				return false;
@@ -332,7 +332,7 @@
 				curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 				curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:39.0) Gecko/20100101 Firefox/39.0 Waterfox/39.0');
 				//Set URL, referrer, and other options
-				if(strpos($url,'pixiv') !== false){
+				if(str_contains($url,'pixiv')){
 					curl_setopt($ch, CURLOPT_REFERER, 'http://www.pixiv.net/');					
 				}
 				//Grab file from URL and store in var
@@ -408,7 +408,7 @@
 			}else{
 				$iinfo = getimagesize("./images/".$filename.$ext);
 				$ichecksum = $this->checksum("./images/".$filename.$ext);
-				if(substr($iinfo['mime'],0,5) != "image" || $iinfo[0] < $f3->get('min_upload_width') && $f3->get('min_upload_width') != 0 || $iinfo[0] > $f3->get('max_upload_width') && $f3->get('max_upload_width') != 0 || $iinfo[1] < $f3->get('min_upload_height') && $f3->get('min_upload_height') != 0 || $iinfo[1] > $f3->get('max_upload_height') && $f3->get('max_upload_height') != 0 || !$ichecksum){
+				if(!str_starts_with($iinfo['mime'], "image") || $iinfo[0] < $f3->get('min_upload_width') && $f3->get('min_upload_width') != 0 || $iinfo[0] > $f3->get('max_upload_width') && $f3->get('max_upload_width') != 0 || $iinfo[1] < $f3->get('min_upload_height') && $f3->get('min_upload_height') != 0 || $iinfo[1] > $f3->get('max_upload_height') && $f3->get('max_upload_height') != 0 || !$ichecksum){
 					if ($ichecksum){
 						$this->error = "Unsupported image extension or image too big, upload failed.";
 					}
@@ -480,7 +480,7 @@
 				//Make sure image conforms to site width & height policies
 				$iinfo = getimagesize("./tmp/".$fname.$ext);
 				$ichecksum = $this->checksum("./tmp/".$fname.$ext);
-				if(substr($iinfo['mime'],0,5) != "image" || $iinfo[0] < $f3->get('min_upload_width') && $f3->get('min_upload_width') != 0 || $iinfo[0] > $f3->get('max_upload_width') && $f3->get('max_upload_width') != 0 || $iinfo[1] < $f3->get('min_upload_height') && $f3->get('min_upload_height') != 0 || $iinfo[1] > $f3->get('max_upload_height') && $f3->get('max_upload_height') != 0 || !$ichecksum){
+				if(!str_starts_with($iinfo['mime'], "image") || $iinfo[0] < $f3->get('min_upload_width') && $f3->get('min_upload_width') != 0 || $iinfo[0] > $f3->get('max_upload_width') && $f3->get('max_upload_width') != 0 || $iinfo[1] < $f3->get('min_upload_height') && $f3->get('min_upload_height') != 0 || $iinfo[1] > $f3->get('max_upload_height') && $f3->get('max_upload_height') != 0 || !$ichecksum){
 					if ($ichecksum){
 						$this->error = "Unsupported image extension or image too big/too small, upload failed.";
 					}

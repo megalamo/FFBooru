@@ -32,9 +32,7 @@ class Matrix extends Prefab {
 	**/
 	function pick(array $var,$col) {
 		return array_map(
-			function($row) use($col) {
-				return $row[$col];
-			},
+			fn($row) => $row[$col],
 			$var
 		);
 	}
@@ -63,7 +61,7 @@ class Matrix extends Prefab {
 		uasort(
 			$var,
 			function($val1,$val2) use($col,$order) {
-				list($v1,$v2)=array($val1[$col],$val2[$col]);
+				[$v1, $v2]=array($val1[$col],$val2[$col]);
 				$out=is_numeric($v1) && is_numeric($v2)?
 					Base::instance()->sign($v1-$v2):strcmp($v1,$v2);
 				if ($order==SORT_DESC)

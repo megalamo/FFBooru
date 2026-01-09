@@ -22,6 +22,8 @@ class FFProbeDriver extends AbstractBinary
 {
     /**
      * {@inheritdoc}
+     *
+     * @return string
      */
     public function getName()
     {
@@ -36,13 +38,13 @@ class FFProbeDriver extends AbstractBinary
      *
      * @return FFProbeDriver
      */
-    public static function create($configuration, LoggerInterface $logger = null)
+    public static function create($configuration, ?LoggerInterface $logger = null)
     {
         if (!$configuration instanceof ConfigurationInterface) {
             $configuration = new Configuration($configuration);
         }
 
-        $binaries = $configuration->get('ffprobe.binaries', array('avprobe', 'ffprobe'));
+        $binaries = $configuration->get('ffprobe.binaries', ['avprobe', 'ffprobe']);
 
         try {
             return static::load($binaries, $logger, $configuration);

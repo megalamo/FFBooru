@@ -88,13 +88,13 @@ function copyMe(node) {
 		$tags = explode(" ",$tags);
 		$tag_count = count($tags);
 		$new_tag_cache = urldecode($tags[0]);
-		if(strpos(strtolower($new_tag_cache),"parent:") === false && strpos(strtolower($new_tag_cache),"user:") === false && strpos(strtolower($new_tag_cache),"rating:") === false && strpos($new_tag_cache,"*") === false)
+		if(!str_contains(strtolower($new_tag_cache),"parent:") && !str_contains(strtolower($new_tag_cache),"user:") && !str_contains(strtolower($new_tag_cache),"rating:") && !str_contains($new_tag_cache,"*"))
 			$new_tag_cache = $misc->windows_filename_fix($new_tag_cache);
 		if($page == 0)
 			$pagenum = 1;
 		else
 			$pagenum = ($_GET['pid']/$limit)+1;
-		if($tag_count > 1 || !$enable_cache || !is_dir($main_cache_dir."search_cache/$new_tag_cache/") || !file_exists($main_cache_dir."search_cache/$new_tag_cache/$pagenum.html") || strpos(strtolower($new_tag_cache),"all") !== false || strpos(strtolower($new_tag_cache),"user:") !== false || strpos(strtolower($new_tag_cache),"rating:") !== false || substr($new_tag_cache,0,1) == "-" || strpos(strtolower($new_tag_cache),"*") !== false || strpos(strtolower($new_tag_cache),"parent:") !== false || strpos(strtolower($new_tag_cache),"width:") !== false || strpos(strtolower($new_tag_cache),"height:") !== false)
+		if($tag_count > 1 || !$enable_cache || !is_dir($main_cache_dir."search_cache/$new_tag_cache/") || !file_exists($main_cache_dir."search_cache/$new_tag_cache/$pagenum.html") || str_contains(strtolower($new_tag_cache),"all") || str_contains(strtolower($new_tag_cache),"user:") || str_contains(strtolower($new_tag_cache),"rating:") || str_starts_with($new_tag_cache, "-") || str_contains(strtolower($new_tag_cache),"*") || str_contains(strtolower($new_tag_cache),"parent:") || str_contains(strtolower($new_tag_cache),"width:") || str_contains(strtolower($new_tag_cache),"height:"))
 		{
 			if($enable_cache && !is_dir($main_cache_dir."search_cache/"))
 				@mkdir($main_cache_dir."search_cache");
@@ -102,7 +102,7 @@ function copyMe(node) {
 			$result = $db->query($query) or die($db->error);
 			$numrows = $result->num_rows;
 			$result->free_result();
-			if($tag_count > 1 || strtolower($new_tag_cache) == "all" || strpos(strtolower($new_tag_cache),"user:") !== false || strpos(strtolower($new_tag_cache),"rating:") !== false || substr($new_tag_cache,0,1) == "-" || strpos(strtolower($new_tag_cache),"*") !== false || strpos(strtolower($new_tag_cache),"parent:") !== false || strpos(strtolower($new_tag_cache),"width:") !== false || strpos(strtolower($new_tag_cache),"height:") !== false)
+			if($tag_count > 1 || strtolower($new_tag_cache) == "all" || str_contains(strtolower($new_tag_cache),"user:") || str_contains(strtolower($new_tag_cache),"rating:") || str_starts_with($new_tag_cache, "-") || str_contains(strtolower($new_tag_cache),"*") || str_contains(strtolower($new_tag_cache),"parent:") || str_contains(strtolower($new_tag_cache),"width:") || str_contains(strtolower($new_tag_cache),"height:"))
 				$should_cache_response = false;
 			else
 			{
@@ -146,10 +146,10 @@ function copyMe(node) {
 			$query = "SELECT id, image, directory, score, rating, tags, owner FROM $post_table ORDER BY id DESC LIMIT $page, $limit";
 		else
 		{
-			if($should_cache_response || isset($tag_count) && $tag_count > 1 || strpos(strtolower($new_tag_cache),"user:") !== false || strpos(strtolower($new_tag_cache),"rating:") !== false || substr($new_tag_cache,0,1) == "-" || strpos(strtolower($new_tag_cache),"*") !== false || strpos(strtolower($new_tag_cache),"parent:") !== false)
+			if($should_cache_response || isset($tag_count) && $tag_count > 1 || str_contains(strtolower($new_tag_cache),"user:") || str_contains(strtolower($new_tag_cache),"rating:") || str_starts_with($new_tag_cache, "-") || str_contains(strtolower($new_tag_cache),"*") || str_contains(strtolower($new_tag_cache),"parent:"))
 				$query = $query." LIMIT $page, $limit";			
 		}
-		if(!isset($_GET['tags']) || $should_cache_response || isset($tag_count) && $tag_count > 1 || strtolower($_GET['tags']) == "all" || strpos(strtolower($new_tag_cache),"user:") !== false || strpos(strtolower($new_tag_cache),"rating:") !== false || substr($new_tag_cache,0,1) == "-" || strpos(strtolower($new_tag_cache),"*") !== false || strpos(strtolower($new_tag_cache),"parent:") !== false || strpos(strtolower($new_tag_cache),"width:") !== false || strpos(strtolower($new_tag_cache),"height:") !== false)
+		if(!isset($_GET['tags']) || $should_cache_response || isset($tag_count) && $tag_count > 1 || strtolower($_GET['tags']) == "all" || str_contains(strtolower($new_tag_cache),"user:") || str_contains(strtolower($new_tag_cache),"rating:") || str_starts_with($new_tag_cache, "-") || str_contains(strtolower($new_tag_cache),"*") || str_contains(strtolower($new_tag_cache),"parent:") || str_contains(strtolower($new_tag_cache),"width:") || str_contains(strtolower($new_tag_cache),"height:"))
 		{
 			if($should_cache_response && $enable_cache)
 				ob_start();
@@ -174,9 +174,9 @@ function copyMe(node) {
 						}
 					}
 				}
-				if(substr($row['image'], -4) == ".svg")
+				if(str_ends_with($row['image'], ".svg"))
 					$images .= '<span class="thumb"><a id="p'.$row['id'].'" href="index.php?page=post&amp;s=view&amp;id='.$row['id'].'"><img src="'.$site_url.$image_folder.'/'.$row['directory'].'/'.$row['image'].'" alt="post" width="150" height="150" border="0" title="'.$row['tags'].' score:'.$row['score'].' rating:'. $row['rating'].'"/></a>';
-				else if(substr($row['image'], -5) == ".webm" || substr($row['image'], -4) == ".mp4")
+				else if(str_ends_with($row['image'], ".webm") || str_ends_with($row['image'], ".mp4"))
 				{
 					$img = substr($row['image'],0,strrpos($row['image'], "."));
 					$img .= ".png";

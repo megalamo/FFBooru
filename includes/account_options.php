@@ -3,64 +3,64 @@
 	{
 		if(isset($_POST['users']) && $_POST['users'] != "")
 		{
-			setcookie("user_blacklist",strtolower(str_replace('\\',"&#92;",str_replace(' ','%20',str_replace("'","&#039;",$_POST['users'])))),time()+60*60*24*365);
+			setcookie("user_blacklist",strtolower(str_replace('\\',"&#92;",str_replace(' ','%20',str_replace("'","&#039;",$_POST['users'])))),['expires' => time()+60*60*24*365]);
 			$new_user_list = $_POST['users'];
 		}
 		else
 		{
-			setcookie("user_blacklist",'',time()-60*60*24*365);
+			setcookie("user_blacklist",'',['expires' => time()-60*60*24*365]);
 			$new_user_list = " ";
 		}
 		if(isset($_POST['tags']) && $_POST['tags'])
 		{
-			setcookie("tag_blacklist",str_replace('\\',"&#92;",str_replace(' ','%20',str_replace("'","&#039;",$_POST['tags']))),time()+60*60*24*365);
+			setcookie("tag_blacklist",str_replace('\\',"&#92;",str_replace(' ','%20',str_replace("'","&#039;",$_POST['tags']))),['expires' => time()+60*60*24*365]);
 			$new_tag_list = $_POST['tags'];
 		}
 		else
 		{
-			setcookie("tag_blacklist","",time()-60*60*24*365);
+			setcookie("tag_blacklist","",['expires' => time()-60*60*24*365]);
 			$new_tag_list = " ";
 		}
 		if(isset($_POST['cthreshold']) && $_POST['cthreshold'] != "")
 		{
 			if(!is_numeric($_POST['cthreshold']))
 			{
-				setcookie('comment_threshold',0,time()+60*60*24*365);
+				setcookie('comment_threshold',0,['expires' => time()+60*60*24*365]);
 				$new_cthreshold = 0;
 			}
 			else
 			{
-				setcookie('comment_threshold',$_POST['cthreshold'],time()+60*60*24*365);
+				setcookie('comment_threshold',$_POST['cthreshold'],['expires' => time()+60*60*24*365]);
 				$new_cthreshold = $_POST['cthreshold'];
 			}
 		}
 		else
 		{
-			setcookie('comment_threshold',"",time()-60*60*24*365);
+			setcookie('comment_threshold',"",['expires' => time()-60*60*24*365]);
 			$new_cthreshold = 0;
 		}
 		if(isset($_POST['pthreshold']) && $_POST['pthreshold'] != "")
 		{
 			if(!is_numeric($_POST['pthreshold']))
 			{
-				setcookie('post_threshold',0,time()+60*60*24*365);
+				setcookie('post_threshold',0,['expires' => time()+60*60*24*365]);
 				$new_pthreshold = 0;
 			}
 			else
 			{
-				setcookie('post_threshold',$_POST['pthreshold'],time()+60*60*24*365);
+				setcookie('post_threshold',$_POST['pthreshold'],['expires' => time()+60*60*24*365]);
 				$new_pthreshold = $_POST['pthreshold'];
 			}
 		}
 		else
 		{
-			setcookie('post_threshold',"",time()-60*60*24*365);
+			setcookie('post_threshold',"",['expires' => time()-60*60*24*365]);
 			$new_pthreshold = 0;
 		}
 		if(isset($_POST['my_tags']) && $_POST['my_tags'] != "")
 		{
 			$user = new user();
-			setcookie("tags",str_replace(" ","%20",str_replace("'","&#039;",$_POST['my_tags'])),time()+60*60*24*365);
+			setcookie("tags",str_replace(" ","%20",str_replace("'","&#039;",$_POST['my_tags'])),['expires' => time()+60*60*24*365]);
 			$new_my_tags = $_POST['my_tags'];
 			if($user->check_log())
 			{
@@ -71,7 +71,7 @@
 		}
 		else
 		{
-			setcookie("tags",'',time()-60*60*24*365);
+			setcookie("tags",'',['expires' => time()-60*60*24*365]);
 			$new_my_tags = " ";
 		}
 	}

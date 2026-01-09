@@ -6,7 +6,7 @@ $ip = $_SERVER['REMOTE_ADDR'];
 
 //Check if user is banned
 if($user->banned_ip($ip)){
-    $logger->log_action($f3->get('checked_user_id'), $_SERVER['REMOTE_ADDR'], 'FORUM_EDIT', 'BANNED');
+    $logger->log_action($_SERVER['REMOTE_ADDR'], 'FORUM_EDIT', $f3->get('checked_user_id'), 'BANNED');
 	$template=new Template;
     echo $template->render('no_permission.html');
 	exit();
@@ -14,7 +14,7 @@ if($user->banned_ip($ip)){
 
 //Check if user is logged in
 if(!$user->check_log()){
-    $logger->log_action($f3->get('checked_user_id'), $_SERVER['REMOTE_ADDR'], 'FORUM_EDIT', 'NOT_LOGGED_IN');
+    $logger->log_action($_SERVER['REMOTE_ADDR'], 'FORUM_EDIT', $f3->get('checked_user_id'), 'NOT_LOGGED_IN');
 	$template=new Template;
     echo $template->render('no_permission.html');
 	exit();
@@ -50,11 +50,11 @@ if(isset($_POST['title']) && isset($_POST['post']) && $f3->get('PARAMS.option') 
 		//Update forum post
         $update2 = $db->exec('UPDATE '.$f3->get('forum_post_table').' SET title = ?, post = ? WHERE topic_id = ? AND id = ?',array(1=>$title,2=>$post,3=>$pid,4=>$cid));
 		//Done, redirect the user to the page their post is on
-		$logger->log_action($f3->get('checked_user_id'), $_SERVER['REMOTE_ADDR'], 'FORUM_EDIT_POST', 'SUCCESS', $pid);
+		$logger->log_action($_SERVER['REMOTE_ADDR'], 'FORUM_EDIT_POST', $f3->get('checked_user_id'), 'SUCCESS', $pid);
 		$f3->reroute('/forum/view/'.$pid.'/'.$ppid.'#'.$cid);
 	}else{
 		//User does not have access to edit, redirect
-		$logger->log_action($f3->get('checked_user_id'), $_SERVER['REMOTE_ADDR'], 'FORUM_EDIT_POST', 'NO_ACCESS', $pid);
+		$logger->log_action($_SERVER['REMOTE_ADDR'], 'FORUM_EDIT_POST', $f3->get('checked_user_id'), 'NO_ACCESS', $pid);
 		$f3->reroute('/forum/view/'.$pid.'/'.$ppid.'#'.$cid);		
 	}
 }else if(($f3->get('PARAMS.option') == "pin" || $f3->get('PARAMS.option') == "unpin") && $f3->get('PARAMS.topicid') !== "" && is_numeric($f3->get('PARAMS.topicid')) && $f3->get('PARAMS.page') !== "" && is_numeric($f3->get('PARAMS.page'))){
@@ -75,11 +75,11 @@ if(isset($_POST['title']) && isset($_POST['post']) && $f3->get('PARAMS.option') 
 			$update = $db->exec('UPDATE '.$f3->get('forum_topic_table').' SET priority = \'0\' WHERE id = ?',array(1=>$id));
 		}
 		//Done, redirect the user to the page their topic is on
-		$logger->log_action($f3->get('checked_user_id'), $_SERVER['REMOTE_ADDR'], 'FORUM_PIN_TOPIC', 'SUCCESS', $id);
+		$logger->log_action($_SERVER['REMOTE_ADDR'], 'FORUM_PIN_TOPIC', $f3->get('checked_user_id'), 'SUCCESS', $id);
 		$f3->reroute('/forum/list/'.$pid);
 	}else{
 		//User does not have access to pin, redirect
-		$logger->log_action($f3->get('checked_user_id'), $_SERVER['REMOTE_ADDR'], 'FORUM_PIN_TOPIC', 'NO_ACCESS', $id);
+		$logger->log_action($_SERVER['REMOTE_ADDR'], 'FORUM_PIN_TOPIC', $f3->get('checked_user_id'), 'NO_ACCESS', $id);
 		$f3->reroute('/forum/list/'.$pid);		
 	}
 }else if(($f3->get('PARAMS.option') == "lock" || $f3->get('PARAMS.option') == "unlock") && $f3->get('PARAMS.topicid') !== "" && is_numeric($f3->get('PARAMS.topicid')) && $f3->get('PARAMS.page') !== "" && is_numeric($f3->get('PARAMS.page'))){
@@ -100,11 +100,11 @@ if(isset($_POST['title']) && isset($_POST['post']) && $f3->get('PARAMS.option') 
 			$update = $db->exec('UPDATE '.$f3->get('forum_topic_table').' SET locked = false WHERE id = ?',array(1=>$id));
 		}
 		//Done, redirect the user to the page their topic is on
-		$logger->log_action($f3->get('checked_user_id'), $_SERVER['REMOTE_ADDR'], 'FORUM_LOCK_TOPIC', 'SUCCESS', $id);
+		$logger->log_action($_SERVER['REMOTE_ADDR'], 'FORUM_LOCK_TOPIC', $f3->get('checked_user_id'), 'SUCCESS', $id);
 		$f3->reroute('/forum/view/'.$id.'/'.$pid);
 	}else{
 		//User does not have access to lock, redirect
-		$logger->log_action($f3->get('checked_user_id'), $_SERVER['REMOTE_ADDR'], 'FORUM_LOCK_TOPIC', 'NO_ACCESS', $id);
+		$logger->log_action($_SERVER['REMOTE_ADDR'], 'FORUM_LOCK_TOPIC', $f3->get('checked_user_id'), 'NO_ACCESS', $id);
 		$f3->reroute('/forum/view/'.$id.'/'.$pid);		
 	}
 }else{

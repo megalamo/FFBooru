@@ -43,21 +43,21 @@
             //Check if user is using TOR
 			try{
 	            if($tor->setTarget($_SERVER['REMOTE_ADDR'])->isTorActive()){
-	                $this->logger->log_action(0, $_SERVER['REMOTE_ADDR'], 'REGISTER', 'FAIL_TOR', $user." ".$email);
+	                $this->logger->log_action($_SERVER['REMOTE_ADDR'], 'REGISTER', 0, 'FAIL_TOR', $user." ".$email);
 	                return false;
 	            }
-			}catch(Exception $e){
+			}catch(Exception){
 				//Probably an ipv6 address
-				$this->logger->log_action(0, $_SERVER['REMOTE_ADDR'], 'REGISTER', 'TOR_EXCEPTION', $user." ".$email);
+				$this->logger->log_action($_SERVER['REMOTE_ADDR'], 'REGISTER', 0, 'TOR_EXCEPTION', $user." ".$email);
 			}	        
             //Check if user is in StopForumSpam database
             if ($this->SpammerCheck("ip", $_SERVER['REMOTE_ADDR'], 50) == true || $this->SpammerCheck("username", $user, 50) == true){
-                $this->logger->log_action(0, $_SERVER['REMOTE_ADDR'], 'REGISTER', 'FAIL_SPAM', $user." ".$email);
+                $this->logger->log_action($_SERVER['REMOTE_ADDR'], 'REGISTER', 0, 'FAIL_SPAM', $user." ".$email);
                 return false;
             }
             //Check for username with disallowed characters or too short
-            if(strpos($user,' ') !== false || strpos($user,'	') !== false || strpos($user,';') !== false || strpos($user,',') !== false || strlen($user) < 3){
-                $this->logger->log_action(0, $_SERVER['REMOTE_ADDR'], 'REGISTER', 'FAIL_INVALID', $user." ".$email);
+            if(str_contains($user,' ') || str_contains($user,'	') || str_contains($user,';') || str_contains($user,',') || strlen($user) < 3){
+                $this->logger->log_action($_SERVER['REMOTE_ADDR'], 'REGISTER', 0, 'FAIL_INVALID', $user." ".$email);
                 return false;
             }
 			$domain = explode("@",$email);
@@ -67,7 +67,7 @@
             }
 			//Check if already exists in database
             if($this->username_exists($user)){
-                $this->logger->log_action(0, $_SERVER['REMOTE_ADDR'], 'REGISTER', 'FAIL_EXISTS', $user." ".$email);
+                $this->logger->log_action($_SERVER['REMOTE_ADDR'], 'REGISTER', 0, 'FAIL_EXISTS', $user." ".$email);
                 return false;
             }
 			//Add the user into the database
@@ -75,10 +75,10 @@
 			$gid = $result[0]['id'];
 			$insert = $db->exec('INSERT INTO '.$f3->get('user_table')." (user, pass, email, ip, ugroup, mail_reset_code, signup_date) VALUES(?, ?, ?, ?, ?, '', NOW())",array(1=>$user,2=>$this->hashpass($pass),3=>$email,4=>$ip,5=>$gid));
 			if($insert){
-				$this->logger->log_action(0, $_SERVER['REMOTE_ADDR'], 'REGISTER', 'SUCCESS', $user." ".$email);
+				$this->logger->log_action($_SERVER['REMOTE_ADDR'], 'REGISTER', 0, 'SUCCESS', $user." ".$email);
                 return true;
 			}else{
-				$this->logger->log_action(0, $_SERVER['REMOTE_ADDR'], 'REGISTER', 'FAIL_DB', $user." ".$email);
+				$this->logger->log_action($_SERVER['REMOTE_ADDR'], 'REGISTER', 0, 'FAIL_DB', $user." ".$email);
                 return false;
             }
 		}
@@ -92,9 +92,9 @@
             if ($xml->appears == "yes"){
                 if ($xml->confidence >= $spam_chance){
                     $spammer = true;
-                    $this->logger->log_action(0, $_SERVER['REMOTE_ADDR'], 'SPAMMER_CHECK', 'TRUE', $type." ".$userinfo);
+                    $this->logger->log_action($_SERVER['REMOTE_ADDR'], 'SPAMMER_CHECK', 0, 'TRUE', $type." ".$userinfo);
                 }else{
-                	$this->logger->log_action(0, $_SERVER['REMOTE_ADDR'], 'SPAMMER_CHECK', 'FALSE', $type." ".$userinfo);
+                	$this->logger->log_action($_SERVER['REMOTE_ADDR'], 'SPAMMER_CHECK', 0, 'FALSE', $type." ".$userinfo);
                 }
             }
             return $spammer;
@@ -105,12 +105,12 @@
             $tor = $this->torh;
 			try{
 	            if($tor->setTarget($_SERVER['REMOTE_ADDR'])->isTorActive()){
-	                $this->logger->log_action(0, $_SERVER['REMOTE_ADDR'], 'LOGIN', 'FAIL_TOR',$user);
+	                $this->logger->log_action($_SERVER['REMOTE_ADDR'], 'LOGIN', 0, 'FAIL_TOR',$user);
 	                return false;
 	            }
-			}catch(Exception $e){
+			}catch(Exception){
 				//Probably an ipv6 address
-				$this->logger->log_action(0, $_SERVER['REMOTE_ADDR'], 'LOGIN', 'TOR_EXCEPTION', $user);
+				$this->logger->log_action($_SERVER['REMOTE_ADDR'], 'LOGIN', 0, 'TOR_EXCEPTION', $user);
 			}
 			$pass = $this->hashpass($pass);
 			$result = $db->exec('SELECT * FROM '.$f3->get('user_table')." WHERE user = ? AND pass = ?",array(1=>$user,2=>$pass));
@@ -121,10 +121,10 @@
 		        $f3->set('COOKIE.tags',$result[0]['my_tags'],60*60*24*365);
 				if(!isset($_COOKIE['tag_blacklist']) && $result[0]['tags'] != "")
 					$f3->set('COOKIE.tag_blacklist',$result[0]['tags']);
-				$this->logger->log_action($result[0]['id'], $_SERVER['REMOTE_ADDR'], 'LOGIN', 'SUCCESS');
+				$this->logger->log_action($_SERVER['REMOTE_ADDR'], 'LOGIN', $result[0]['id'], 'SUCCESS');
                 return true;
 			}else{
-				$this->logger->log_action(0, $_SERVER['REMOTE_ADDR'], 'LOGIN', 'FAIL_BADUSER',$user);
+				$this->logger->log_action($_SERVER['REMOTE_ADDR'], 'LOGIN', 0, 'FAIL_BADUSER',$user);
                 return false;
 			}
 		}
@@ -134,7 +134,7 @@
             $f3->set('COOKIE.user_id', '', 0);
             $f3->set('COOKIE.pass_hash', '', 0);
             $f3->set('COOKIE.tags', '', 0);
-			$this->logger->log_action(0, $_SERVER['REMOTE_ADDR'], 'LOGOUT', 'SUCCESS');
+			$this->logger->log_action($_SERVER['REMOTE_ADDR'], 'LOGOUT', 0, 'SUCCESS');
             $f3->reroute('/post/all');
 		}
 		
@@ -143,12 +143,12 @@
             $tor = $this->torh;
 			try{
 	            if($tor->setTarget($_SERVER['REMOTE_ADDR'])->isTorActive()){
-	                $this->logger->log_action($f3->get('COOKIE.user_id'), $_SERVER['REMOTE_ADDR'], 'CHECK_LOGIN', 'FAILED_TOR');
+	                $this->logger->log_action($_SERVER['REMOTE_ADDR'], 'CHECK_LOGIN', $f3->get('COOKIE.user_id'), 'FAILED_TOR');
 	                return false;
             	}
-			}catch(Exception $e){
+			}catch(Exception){
 				//Probably an ipv6 address
-				$this->logger->log_action(0, $_SERVER['REMOTE_ADDR'], 'CHECK_LOGIN', 'TOR_EXCEPTION');
+				$this->logger->log_action($_SERVER['REMOTE_ADDR'], 'CHECK_LOGIN', 0, 'TOR_EXCEPTION');
 			}
 			$result = $db->exec('SELECT * FROM '.$f3->get('user_table').' WHERE id=? AND pass=?',array(1=>$f3->get('COOKIE.user_id'),2=>$f3->get('COOKIE.pass_hash')));
 			if(count($result) == 1){
@@ -320,7 +320,7 @@
 			if($remove){
 				$uuid = NULL;
 			}else{
-				$uuid = uniqid(rand(), true);
+				$uuid = uniqid(random_int(0, mt_getrandmax()), true);
 			}
 			$update = $db->exec('UPDATE '.$f3->get('user_table').' SET api_key = ? WHERE id = ?',array(1=>$uuid,$id));
 			if($update){

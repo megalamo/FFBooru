@@ -204,7 +204,7 @@ class Auth {
 		elseif (isset($_SERVER['REDIRECT_HTTP_AUTHORIZATION']))
 			$hdr=$_SERVER['REDIRECT_HTTP_AUTHORIZATION'];
 		if (!empty($hdr))
-			list($_SERVER['PHP_AUTH_USER'],$_SERVER['PHP_AUTH_PW'])=
+			[$_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW']]=
 				explode(':',base64_decode(substr($hdr,6)));
 		if (isset($_SERVER['PHP_AUTH_USER'],$_SERVER['PHP_AUTH_PW']) &&
 			$this->login(
