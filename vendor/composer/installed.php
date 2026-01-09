@@ -3,7 +3,7 @@
         'name' => 'l337espeon/php-booru',
         'pretty_version' => 'dev-master',
         'version' => 'dev-master',
-        'reference' => 'ec321184736fbf34b98801549ceeaffd51fc49e1',
+        'reference' => 'cd275b57d782166fab314cf937d3f54a2a20c566',
         'type' => 'library',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -58,7 +58,7 @@
         'l337espeon/php-booru' => array(
             'pretty_version' => 'dev-master',
             'version' => 'dev-master',
-            'reference' => 'ec321184736fbf34b98801549ceeaffd51fc49e1',
+            'reference' => 'cd275b57d782166fab314cf937d3f54a2a20c566',
             'type' => 'library',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
